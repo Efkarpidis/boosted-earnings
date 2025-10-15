@@ -1,5 +1,5 @@
 import { initializeApp, getApps, FirebaseError } from "firebase/app"
-import { getFirestore } from "firebase/firestore"
+import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, limit } from "firebase/firestore"
 import { getAuth } from "firebase/auth"
 
 const firebaseConfig = {
@@ -44,6 +44,44 @@ try {
   } else {
     console.error("[Firebase] Unknown initialization error")
     throw new Error("Failed to initialize Firebase")
+  }
+}
+
+export { collection, addDoc }
+
+export async function checkExistingEmail(email: string): Promise<{ exists: boolean; message?: string }> {
+  try {
+    if (!db) {
+      throw new Error("Firestore is not initialized")
+    }
+
+    const submissionsRef = collection(db, "submissions")
+    const q = query(submissionsRef, where("email", "==", email), orderBy("timestamp", "desc"), limit(1))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+      return { exists: false }
+    }
+
+    const lastSubmission = querySnapshot.docs[0].data()
+    const lastSubmissionTime = lastSubmission.timestamp?.toDate() || new Date(0)
+    const now = new Date()
+    const timeDifference = now.getTime() - lastSubmissionTime.getTime()
+    const fiveMinutesInMs = 5 * 60 * 1000
+
+    if (timeDifference < fiveMinutesInMs) {
+      const remainingMinutes = Math.ceil((fiveMinutesInMs - timeDifference) / 60000)
+      return {
+        exists: true,
+        message: `This email was recently used. Please wait ${remainingMinutes} minute${remainingMinutes > 1 ? "s" : ""} before submitting again.`,
+      }
+    }
+
+    return { exists: false }
+  } catch (error) {
+    console.error("[Firebase] Error checking existing email:", error)
+    throw new Error("Failed to check email. Please try again.")
   }
 }
 
