@@ -5,107 +5,149 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useAuth } from "@/lib/auth-context"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { auth } from "@/lib/firebase"
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { UserPlus } from "lucide-react"
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()
   const router = useRouter()
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
       return
     }
 
-    if (password.length < 6) {
+    if (formData.password.length < 6) {
       setError("Password must be at least 6 characters")
       return
     }
 
-    setLoading(true)
+    setIsLoading(true)
 
     try {
-      await signUp(email, password)
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+
+      // Update user profile with name
+      await updateProfile(userCredential.user, {
+        displayName: formData.name,
+      })
+
       router.push("/dashboard")
-    } catch (err: any) {
-      setError(err.message || "Failed to create account")
+    } catch (error: any) {
+      console.error("Signup error:", error)
+      setError(error.message || "Failed to create account. Please try again.")
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-20">
-      <Card className="w-full max-w-md border-border bg-card">
-        <CardHeader>
-          <CardTitle className="text-2xl">Create Account</CardTitle>
-          <CardDescription>Sign up for Boosted Earnings</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+    <div className="min-h-screen bg-black">
+      <Header />
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+      <section className="pt-32 pb-20 px-4">
+        <div className="container mx-auto max-w-md">
+          <Card className="bg-card/50 backdrop-blur-sm border-gold/20">
+            <CardHeader>
+              <CardTitle className="text-3xl font-bold text-gold text-center flex items-center justify-center gap-2">
+                <UserPlus className="w-8 h-8" />
+                Create Account
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Full Name</label>
+                  <Input
+                    type="text"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="bg-background border-gold/30 focus:border-gold text-foreground"
+                    required
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Email Address</label>
+                  <Input
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="bg-background border-gold/30 focus:border-gold text-foreground"
+                    required
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Password</label>
+                  <Input
+                    type="password"
+                    placeholder="At least 6 characters"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="bg-background border-gold/30 focus:border-gold text-foreground"
+                    required
+                  />
+                </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Create Account"}
-            </Button>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Confirm Password</label>
+                  <Input
+                    type="password"
+                    placeholder="Re-enter your password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="bg-background border-gold/30 focus:border-gold text-foreground"
+                    required
+                  />
+                </div>
 
-            <div className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link href="/login" className="font-semibold text-primary hover:underline">
-                Sign in
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                {error && (
+                  <div className="p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive-foreground text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gold hover:bg-gold-dark text-black font-semibold text-lg py-6 glow-gold disabled:opacity-50"
+                >
+                  {isLoading ? "Creating account..." : "Create Account"}
+                </Button>
+
+                <p className="text-sm text-muted-foreground text-center">
+                  Already have an account?{" "}
+                  <Link href="/login" className="text-gold hover:text-gold-dark font-semibold">
+                    Sign In
+                  </Link>
+                </p>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   )
 }

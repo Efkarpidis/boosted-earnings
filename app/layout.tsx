@@ -1,16 +1,20 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
+import { Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import "./globals.css"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
 import { Suspense } from "react"
+import { AuthProvider } from "@/components/auth/auth-provider"
+import "./globals.css"
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
+})
 
 export const metadata: Metadata = {
-  title: "Boosted Earnings - Maximize Your Gig Driver Income",
-  description: "Track earnings, optimize routes, and boost your income as a rideshare driver with Boosted Earnings.",
+  title: "Boosted Earnings - Elevate Your Rideshare Experience",
+  description: "Designed by a driver, for the driver. Track and optimize your rideshare earnings.",
   generator: "v0.app",
 }
 
@@ -20,13 +24,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Navigation />
-          {children}
-          <Footer />
-        </Suspense>
+    <html lang="en" className="dark">
+      <body className={`font-sans ${poppins.variable} antialiased`}>
+        <AuthProvider>
+          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

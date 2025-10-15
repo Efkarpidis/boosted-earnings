@@ -1,10 +1,7 @@
-// MongoDB connection utility
-// Provides a singleton MongoDB client for database operations
-
 import { MongoClient } from "mongodb"
 
 if (!process.env.MONGODB_URI) {
-  throw new Error("Please add your MongoDB URI to .env.local")
+  throw new Error("Please add your MongoDB URI to .env")
 }
 
 const uri = process.env.MONGODB_URI
@@ -14,7 +11,7 @@ let client: MongoClient
 let clientPromise: Promise<MongoClient>
 
 if (process.env.NODE_ENV === "development") {
-  // In development mode, use a global variable to preserve the client across hot reloads
+  // In development mode, use a global variable to preserve the client across module reloads
   const globalWithMongo = global as typeof globalThis & {
     _mongoClientPromise?: Promise<MongoClient>
   }
