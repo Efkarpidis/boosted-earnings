@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from "firebase/app"
+import { initializeApp, getApps, FirebaseError } from "firebase/app"
 import { getFirestore } from "firebase/firestore"
 import { getAuth } from "firebase/auth"
 
@@ -12,9 +12,39 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 }
 
-// Initialize Firebase (singleton pattern)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-const db = getFirestore(app)
-const auth = getAuth(app)
+function validateFirebaseConfig() {
+  const requiredKeys = ["apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId"]
+
+  const missingKeys = requiredKeys.filter((key) => !firebaseConfig[key as keyof typeof firebaseConfig])
+
+  if (missingKeys.length > 0) {
+    throw new Error(
+      `Firebase configuration error: Missing required environment variables for ${missingKeys.join(", ")}. ` +
+        `Please ensure all NEXT_PUBLIC_FIREBASE_* environment variables are set.`,
+    )
+  }
+}
+
+let app
+let db
+let auth
+
+try {
+  validateFirebaseConfig()
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+  db = getFirestore(app)
+  auth = getAuth(app)
+} catch (error) {
+  if (error instanceof FirebaseError && error.code === "auth/configuration-not-found") {
+    console.error("[Firebase] Authentication configuration not found. Please check your Firebase project settings.")
+    throw new Error("Firebase authentication is not properly configured. Please contact support.")
+  } else if (error instanceof Error) {
+    console.error("[Firebase] Initialization error:", error.message)
+    throw error
+  } else {
+    console.error("[Firebase] Unknown initialization error")
+    throw new Error("Failed to initialize Firebase")
+  }
+}
 
 export { app, db, auth }
