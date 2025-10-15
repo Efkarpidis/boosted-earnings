@@ -1,78 +1,78 @@
 import Link from "next/link"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check } from "lucide-react"
 
 export default function PricingPage() {
   const plans = [
     {
-      name: "Free Trial",
+      name: "Free",
       price: "$0",
-      period: "14 days",
-      description: "Try all premium features risk-free",
+      period: "forever",
+      description: "Perfect for getting started",
       features: [
-        "All premium features",
-        "Multi-platform tracking",
-        "Advanced analytics",
-        "Route optimization",
-        "Mileage logging",
-        "No credit card required",
+        "Basic earnings tracking",
+        "Up to 2 platform connections",
+        "Weekly reports",
+        "Basic expense tracking",
+        "Mobile app access",
       ],
-      cta: "Start Free Trial",
+      cta: "Get Started",
       highlighted: false,
     },
     {
-      name: "Monthly",
+      name: "Pro",
       price: "$9.99",
       period: "per month",
-      description: "Perfect for trying out the service",
+      description: "For serious drivers",
       features: [
-        "Real-time income tracking",
-        "Multi-platform support",
-        "Advanced analytics dashboard",
-        "AI route optimization",
-        "Automatic mileage logging",
+        "Everything in Free",
+        "Unlimited platform connections",
+        "Real-time earnings sync",
+        "Advanced analytics & insights",
+        "Daily & custom reports",
+        "Expense categorization",
         "Tax preparation tools",
-        "Smart notifications",
-        "Goal tracking",
         "Priority support",
       ],
-      cta: "Get Started",
-      highlighted: false,
+      cta: "Start Free Trial",
+      highlighted: true,
     },
     {
-      name: "Annual",
-      price: "$99",
-      period: "per year",
-      description: "Save 17% with annual billing",
-      savings: "Save $20/year",
+      name: "Enterprise",
+      price: "Custom",
+      period: "contact us",
+      description: "For fleets and teams",
       features: [
-        "Everything in Monthly",
-        "Advanced forecasting",
-        "Custom reports",
-        "API access",
-        "Early access to new features",
+        "Everything in Pro",
+        "Multi-driver management",
+        "Fleet analytics dashboard",
+        "Custom integrations",
         "Dedicated account manager",
-        "Priority support",
-        "2 months free",
+        "API access",
+        "White-label options",
+        "Custom reporting",
       ],
-      cta: "Get Started",
-      highlighted: true,
+      cta: "Contact Sales",
+      highlighted: false,
     },
   ]
 
   return (
-    <div className="flex flex-col">
+    <div className="min-h-screen bg-black">
+      <Header />
+
       {/* Hero Section */}
-      <section className="border-b border-border py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="mb-4 text-balance text-4xl font-bold md:text-5xl">
-              Simple, Transparent <span className="text-primary">Pricing</span>
+      <section className="relative overflow-hidden border-b border-gold-dark/20 bg-gradient-to-b from-black via-black to-black/95">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
+        <div className="container relative mx-auto px-4 py-24">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="mb-6 text-5xl font-bold leading-tight text-white glow-gold md:text-6xl">
+              Simple, Transparent Pricing
             </h1>
-            <p className="text-pretty text-lg text-muted-foreground">
-              Start with a free trial. No credit card required. Cancel anytime.
-            </p>
+            <p className="text-xl text-gold">Choose the plan that fits your needs</p>
           </div>
         </div>
       </section>
@@ -80,150 +80,56 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-8 lg:grid-cols-3">
             {plans.map((plan) => (
               <Card
                 key={plan.name}
-                className={`border-border ${plan.highlighted ? "border-primary bg-card shadow-lg shadow-primary/20" : "bg-card"}`}
+                className={`border-gold-dark/30 bg-card/50 backdrop-blur transition-all hover:border-gold ${
+                  plan.highlighted ? "scale-105 border-gold shadow-lg shadow-gold/20" : ""
+                }`}
               >
                 <CardHeader>
-                  {plan.savings && (
-                    <div className="mb-2 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                      {plan.savings}
+                  <CardTitle className="text-center">
+                    <div className="mb-2 text-2xl font-bold text-gold">{plan.name}</div>
+                    <div className="mb-2">
+                      <span className="text-4xl font-bold text-white">{plan.price}</span>
+                      {plan.price !== "Custom" && <span className="text-muted-foreground"> / {plan.period}</span>}
                     </div>
-                  )}
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">/{plan.period}</span>
-                  </div>
+                    <p className="text-sm text-muted-foreground">{plan.description}</p>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button asChild className="mb-6 w-full" variant={plan.highlighted ? "default" : "outline"}>
-                    <Link href="/beta-signup">{plan.cta}</Link>
-                  </Button>
-                  <ul className="space-y-3">
+                  <ul className="mb-6 space-y-3">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3 text-sm">
-                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span className="text-muted-foreground">{feature}</span>
+                      <li key={feature} className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold" />
+                        <span className="text-sm text-muted-foreground">{feature}</span>
                       </li>
                     ))}
                   </ul>
+                  <Button
+                    asChild
+                    className={`w-full ${
+                      plan.highlighted
+                        ? "bg-gold text-black hover:bg-gold-dark"
+                        : "border-gold bg-transparent text-gold hover:bg-gold hover:text-black"
+                    }`}
+                    variant={plan.highlighted ? "default" : "outline"}
+                  >
+                    <Link href="/beta-signup">{plan.cta}</Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ROI Calculator */}
-      <section className="border-y border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="mb-4 text-center text-3xl font-bold">Calculate Your ROI</h2>
-            <p className="mb-12 text-center text-muted-foreground">
-              See how much you could save and earn with Boosted Earnings
-            </p>
-
-            <Card className="border-border bg-background">
-              <CardContent className="pt-6">
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div>
-                    <h3 className="mb-4 font-semibold">Average Driver Benefits</h3>
-                    <ul className="space-y-3 text-sm">
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Increased earnings (30%)</span>
-                        <span className="font-semibold text-primary">+$750/mo</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Tax deductions saved</span>
-                        <span className="font-semibold text-primary">+$200/mo</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Time saved (5 hrs/mo)</span>
-                        <span className="font-semibold text-primary">+$125/mo</span>
-                      </li>
-                      <li className="flex justify-between border-t border-border pt-3">
-                        <span className="font-semibold">Total monthly benefit</span>
-                        <span className="font-bold text-primary">$1,075</span>
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="mb-4 font-semibold">Your Investment</h3>
-                    <ul className="space-y-3 text-sm">
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Monthly subscription</span>
-                        <span className="font-semibold">$9.99</span>
-                      </li>
-                      <li className="flex justify-between border-t border-border pt-3">
-                        <span className="font-semibold">Net monthly gain</span>
-                        <span className="font-bold text-primary">$1,065</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="font-semibold">ROI</span>
-                        <span className="font-bold text-primary">10,650%</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="mt-12 text-center">
+            <p className="text-muted-foreground">All plans include a 14-day free trial. No credit card required.</p>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="mb-12 text-center text-3xl font-bold">Pricing FAQs</h2>
-            <div className="space-y-6">
-              <div>
-                <h3 className="mb-2 font-semibold">Can I cancel anytime?</h3>
-                <p className="text-sm text-muted-foreground">
-                  Yes! You can cancel your subscription at any time. No questions asked, no cancellation fees.
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-2 font-semibold">What payment methods do you accept?</h3>
-                <p className="text-sm text-muted-foreground">
-                  We accept all major credit cards (Visa, Mastercard, American Express) and PayPal.
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-2 font-semibold">Is there a free trial?</h3>
-                <p className="text-sm text-muted-foreground">
-                  Yes! We offer a 14-day free trial with full access to all premium features. No credit card required.
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-2 font-semibold">Do you offer refunds?</h3>
-                <p className="text-sm text-muted-foreground">
-                  We offer a 30-day money-back guarantee. If you're not satisfied, we'll refund your payment in full.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="border-t border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-3xl font-bold">Start Your Free Trial Today</h2>
-            <p className="mb-8 text-muted-foreground">
-              No credit card required. Cancel anytime. Start maximizing your earnings in minutes.
-            </p>
-            <Button asChild size="lg">
-              <Link href="/beta-signup">Get Started Free</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }

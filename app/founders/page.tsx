@@ -1,137 +1,120 @@
+import Image from "next/image"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
-import { Linkedin, Twitter } from "lucide-react"
+import { Linkedin, Globe } from "lucide-react"
 
 export default function FoundersPage() {
-  const founders = [
-    {
-      name: "Alex Rivera",
-      role: "Co-Founder & CEO",
-      bio: "Former Uber driver turned entrepreneur. Alex spent 5 years driving full-time and saw firsthand the challenges drivers face. With a background in software engineering, he built Boosted Earnings to help drivers maximize their income.",
-      image: "/male-ceo-headshot.png",
-      linkedin: "#",
-      twitter: "#",
-    },
-    {
-      name: "Maya Chen",
-      role: "Co-Founder & CTO",
-      bio: "Data scientist with 10+ years at Google and Tesla. Maya specializes in machine learning and predictive analytics. She leads our engineering team in building intelligent features that help drivers make data-driven decisions.",
-      image: "/female-cto-headshot.png",
-      linkedin: "#",
-      twitter: "#",
-    },
-    {
-      name: "Jordan Williams",
-      role: "Co-Founder & COO",
-      bio: "Operations expert with experience scaling startups from 0 to millions of users. Jordan previously led operations at DoorDash and brings deep knowledge of the gig economy to Boosted Earnings.",
-      image: "/coo-headshot.png",
-      linkedin: "#",
-      twitter: "#",
-    },
-  ]
-
   return (
-    <div className="flex flex-col">
+    <div className="min-h-screen bg-black">
+      <Header />
+
       {/* Hero Section */}
-      <section className="border-b border-border py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="mb-4 text-balance text-4xl font-bold md:text-5xl">Meet the Founders</h1>
-            <p className="text-pretty text-lg text-muted-foreground">
-              We're a team of former drivers, engineers, and operators on a mission to empower gig economy workers.
-            </p>
+      <section className="relative overflow-hidden border-b border-gold-dark/20 bg-gradient-to-b from-black via-black to-black/95">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
+        <div className="container relative mx-auto px-4 py-24">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="mb-6 text-5xl font-bold leading-tight text-white glow-gold md:text-6xl">Meet Our Founder</h1>
+            <p className="text-xl text-gold">Built by a driver who understands your challenges</p>
           </div>
         </div>
       </section>
 
-      {/* Our Story */}
+      {/* Founder Profile Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="mb-6 text-3xl font-bold">Our Story</h2>
-            <div className="space-y-4 text-muted-foreground">
-              <p>
-                Boosted Earnings was born from a simple frustration: as rideshare drivers, we were working hard but had
-                no clear visibility into our true earnings, expenses, or how to optimize our time on the road.
-              </p>
-              <p>
-                After countless hours tracking spreadsheets and trying different apps that fell short, we decided to
-                build the solution ourselves. We combined our expertise in software engineering, data science, and
-                operations to create a platform that truly understands what drivers need.
-              </p>
-              <p>
-                Today, Boosted Earnings helps over 50,000 drivers across the country maximize their income, save time,
-                and make smarter decisions about their work. We're just getting started.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+          <div className="mx-auto max-w-5xl">
+            <Card className="border-gold-dark/30 bg-card/50 backdrop-blur">
+              <CardContent className="p-8 md:p-12">
+                <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+                  {/* Founder Image */}
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="relative mb-6 h-80 w-80 overflow-hidden rounded-lg border-2 border-gold">
+                      <Image
+                        src="/chris-efkarpidis-founder-portrait.jpg"
+                        alt="Chris Efkarpidis - Founder"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <h2 className="mb-2 text-3xl font-bold text-gold">Chris Efkarpidis</h2>
+                    <p className="mb-4 text-lg text-muted-foreground">Founder & CEO</p>
 
-      {/* Team Section */}
-      <section className="border-y border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold">Leadership Team</h2>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {founders.map((founder) => (
-              <Card key={founder.name} className="border-border bg-background">
-                <CardContent className="pt-6">
-                  <img
-                    src={founder.image || "/placeholder.svg"}
-                    alt={founder.name}
-                    className="mb-4 h-48 w-full rounded-lg object-cover"
-                  />
-                  <h3 className="mb-1 text-xl font-semibold">{founder.name}</h3>
-                  <div className="mb-3 text-sm text-primary">{founder.role}</div>
-                  <p className="mb-4 text-sm text-muted-foreground">{founder.bio}</p>
-                  <div className="flex gap-3">
-                    <a href={founder.linkedin} className="text-muted-foreground hover:text-primary">
-                      <Linkedin className="h-5 w-5" />
-                    </a>
-                    <a href={founder.twitter} className="text-muted-foreground hover:text-primary">
-                      <Twitter className="h-5 w-5" />
-                    </a>
+                    {/* Social Links */}
+                    <div className="flex space-x-4">
+                      <a
+                        href="https://www.linkedin.com/in/chris-efkarpidis"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex h-12 w-12 items-center justify-center rounded-full border border-gold-dark/50 bg-black/50 transition-all hover:border-gold hover:bg-gold/10"
+                      >
+                        <Linkedin className="h-6 w-6 text-gold" />
+                      </a>
+                      <a
+                        href="https://www.boostedearnings.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex h-12 w-12 items-center justify-center rounded-full border border-gold-dark/50 bg-black/50 transition-all hover:border-gold hover:bg-gold/10"
+                      >
+                        <Globe className="h-6 w-6 text-gold" />
+                      </a>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                  {/* Founder Bio */}
+                  <div className="flex flex-col justify-center">
+                    <h3 className="mb-6 text-2xl font-semibold text-gold">The Story Behind Boosted Earnings</h3>
+
+                    <div className="space-y-4 text-muted-foreground">
+                      <p>
+                        Chris Efkarpidis is a rideshare driver who experienced firsthand the challenges of tracking
+                        earnings across multiple platforms. After years of manually calculating his true income and
+                        struggling to understand where his money was really going, he decided to build a solution.
+                      </p>
+
+                      <p>
+                        "I was working 60+ hours a week driving for Uber and Lyft, but I had no clear picture of my
+                        actual earnings after expenses," Chris recalls. "I'd see the gross numbers in the apps, but when
+                        I factored in gas, maintenance, and other costs, I realized I was making far less than I
+                        thought."
+                      </p>
+
+                      <p>
+                        This realization sparked the creation of Boosted Earnings. Chris combined his experience as a
+                        driver with his passion for technology to build a platform that gives drivers complete
+                        transparency into their earnings.
+                      </p>
+
+                      <p>
+                        "Every feature in Boosted Earnings solves a real problem I faced as a driver," Chris explains.
+                        "This isn't just another app built by people who've never sat behind the wheel. It's designed by
+                        someone who lives this life every day."
+                      </p>
+
+                      <p className="font-semibold text-gold">
+                        Today, Chris continues to drive part-time while building Boosted Earnings, ensuring the platform
+                        stays true to the needs of real drivers.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mission Statement */}
+                <div className="mt-12 border-t border-gold-dark/30 pt-12">
+                  <h3 className="mb-6 text-center text-2xl font-semibold text-gold">Our Mission</h3>
+                  <p className="mx-auto max-w-3xl text-center text-lg text-muted-foreground">
+                    To empower gig economy workers with the tools and insights they need to maximize their earnings,
+                    make informed decisions, and build sustainable careers. We believe every driver deserves complete
+                    transparency and control over their financial future.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="mb-12 text-center text-3xl font-bold">Our Values</h2>
-            <div className="grid gap-8 md:grid-cols-2">
-              <div>
-                <h3 className="mb-2 text-xl font-semibold text-primary">Driver-First</h3>
-                <p className="text-sm text-muted-foreground">
-                  Every decision we make starts with asking: "How does this help drivers earn more?"
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-2 text-xl font-semibold text-primary">Transparency</h3>
-                <p className="text-sm text-muted-foreground">
-                  We believe in clear pricing, honest communication, and no hidden fees.
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-2 text-xl font-semibold text-primary">Innovation</h3>
-                <p className="text-sm text-muted-foreground">
-                  We're constantly pushing the boundaries of what's possible with data and technology.
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-2 text-xl font-semibold text-primary">Community</h3>
-                <p className="text-sm text-muted-foreground">
-                  We're building more than an app—we're building a community of empowered drivers.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }

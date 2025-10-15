@@ -1,194 +1,126 @@
 import Link from "next/link"
+import Image from "next/image"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar, Clock, ArrowRight } from "lucide-react"
 
 export default function BlogPage() {
-  const featuredPost = {
-    slug: "maximize-earnings-2025",
-    title: "10 Proven Strategies to Maximize Your Rideshare Earnings in 2025",
-    excerpt:
-      "Learn the top strategies used by the highest-earning drivers to boost their income by 40% or more. From optimal driving times to platform-specific tips.",
-    image: "/rideshare-driver-earnings-dashboard.jpg",
-    category: "Earnings Tips",
-    date: "January 15, 2025",
-    readTime: "8 min read",
-    author: "Alex Rivera",
-  }
-
   const posts = [
     {
-      slug: "tax-deductions-guide",
-      title: "The Ultimate Tax Deduction Guide for Gig Drivers",
+      title: "10 Tips to Maximize Your Rideshare Earnings in 2024",
       excerpt:
-        "Maximize your tax savings with this comprehensive guide to deductions. Learn what you can write off and how to track everything properly.",
-      image: "/tax-documents-calculator.png",
-      category: "Taxes",
-      date: "January 12, 2025",
-      readTime: "10 min read",
-      author: "Maya Chen",
-    },
-    {
-      slug: "best-times-to-drive",
-      title: "Data Analysis: The Best Times to Drive in Major Cities",
-      excerpt:
-        "We analyzed millions of trips to find the optimal driving times in the top 20 US cities. See when you should be on the road.",
-      image: "/city-traffic-heatmap.jpg",
-      category: "Earnings Tips",
-      date: "January 10, 2025",
-      readTime: "6 min read",
-      author: "Jordan Williams",
-    },
-    {
-      slug: "vehicle-maintenance-schedule",
-      title: "Essential Vehicle Maintenance Schedule for Rideshare Drivers",
-      excerpt:
-        "Keep your car running smoothly and avoid costly repairs with this maintenance schedule designed specifically for high-mileage drivers.",
-      image: "/car-maintenance-mechanic.jpg",
-      category: "Vehicle Care",
-      date: "January 8, 2025",
-      readTime: "7 min read",
-      author: "Alex Rivera",
-    },
-    {
-      slug: "multi-apping-strategy",
-      title: "Multi-Apping 101: How to Run Multiple Platforms Simultaneously",
-      excerpt:
-        "Learn the art of multi-apping to maximize your earnings. Tips for juggling Uber, Lyft, and DoorDash without getting overwhelmed.",
-      image: "/smartphone-multiple-apps.jpg",
-      category: "Earnings Tips",
-      date: "January 5, 2025",
-      readTime: "9 min read",
-      author: "Maya Chen",
-    },
-    {
-      slug: "quarterly-tax-payments",
-      title: "How to Calculate and Pay Quarterly Taxes as a Gig Worker",
-      excerpt:
-        "Avoid penalties and stay compliant with this step-by-step guide to quarterly tax payments for independent contractors.",
-      image: "/tax-forms-payment.jpg",
-      category: "Taxes",
-      date: "January 3, 2025",
-      readTime: "8 min read",
-      author: "Jordan Williams",
-    },
-    {
-      slug: "customer-ratings-tips",
-      title: "5-Star Service: How to Maintain Perfect Customer Ratings",
-      excerpt:
-        "Your rating affects your earnings. Learn the secrets to consistently delivering 5-star service and keeping customers happy.",
-      image: "/5-star-rating-customer-service.jpg",
-      category: "Driver Tips",
-      date: "December 30, 2024",
+        "Learn the strategies that top drivers use to boost their income, from peak hour optimization to multi-platform strategies.",
+      image: "/blog-rideshare-tips.jpg",
+      date: "March 15, 2024",
       readTime: "5 min read",
-      author: "Alex Rivera",
+      category: "Tips & Tricks",
+    },
+    {
+      title: "Understanding Your True Hourly Rate as a Rideshare Driver",
+      excerpt:
+        "Most drivers don't calculate their real earnings. Here's how to factor in all expenses and understand your actual profit.",
+      image: "/blog-hourly-rate.jpg",
+      date: "March 10, 2024",
+      readTime: "7 min read",
+      category: "Finance",
+    },
+    {
+      title: "Tax Deductions Every Rideshare Driver Should Know",
+      excerpt:
+        "Maximize your tax savings with these essential deductions. From mileage to phone bills, we cover everything you can write off.",
+      image: "/blog-tax-deductions.jpg",
+      date: "March 5, 2024",
+      readTime: "6 min read",
+      category: "Taxes",
+    },
+    {
+      title: "The Best Times to Drive: Data-Driven Insights",
+      excerpt:
+        "We analyzed millions of trips to identify the most profitable hours and days for rideshare drivers in major cities.",
+      image: "/blog-best-times.jpg",
+      date: "February 28, 2024",
+      readTime: "8 min read",
+      category: "Analytics",
+    },
+    {
+      title: "Multi-Platform Strategy: Uber vs Lyft vs DoorDash",
+      excerpt:
+        "Should you drive for multiple platforms? We break down the pros, cons, and strategies for maximizing earnings across apps.",
+      image: "/blog-multi-platform.jpg",
+      date: "February 20, 2024",
+      readTime: "6 min read",
+      category: "Strategy",
+    },
+    {
+      title: "Essential Car Maintenance Tips for Rideshare Drivers",
+      excerpt:
+        "Keep your car running smoothly and avoid costly repairs with these maintenance tips specifically for high-mileage drivers.",
+      image: "/blog-car-maintenance.jpg",
+      date: "February 15, 2024",
+      readTime: "5 min read",
+      category: "Maintenance",
     },
   ]
 
-  const categories = ["All", "Earnings Tips", "Taxes", "Vehicle Care", "Driver Tips", "Market Insights"]
-
   return (
-    <div className="flex flex-col">
+    <div className="min-h-screen bg-black">
+      <Header />
+
       {/* Hero Section */}
-      <section className="border-b border-border py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="mb-4 text-balance text-4xl font-bold md:text-5xl">
-              The <span className="text-primary">Boosted Earnings</span> Blog
+      <section className="relative overflow-hidden border-b border-gold-dark/20 bg-gradient-to-b from-black via-black to-black/95">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
+        <div className="container relative mx-auto px-4 py-24">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="mb-6 text-5xl font-bold leading-tight text-white glow-gold md:text-6xl">
+              Boosted Earnings Blog
             </h1>
-            <p className="text-pretty text-lg text-muted-foreground">
-              Expert tips, strategies, and insights to help you maximize your gig economy earnings.
-            </p>
+            <p className="text-xl text-gold">Tips, strategies, and insights for rideshare drivers</p>
           </div>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="border-b border-border bg-card py-6">
+      {/* Blog Posts Grid */}
+      <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={category === "All" ? "default" : "outline"}
-                size="sm"
-                className="rounded-full"
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Post */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="mb-4 text-sm font-semibold text-primary">Featured Article</div>
-          <Card className="overflow-hidden border-border bg-card">
-            <div className="grid md:grid-cols-2">
-              <img
-                src={featuredPost.image || "/placeholder.svg"}
-                alt={featuredPost.title}
-                className="h-full w-full object-cover"
-              />
-              <CardContent className="flex flex-col justify-center p-8">
-                <div className="mb-3 inline-block w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                  {featuredPost.category}
-                </div>
-                <h2 className="mb-4 text-balance text-2xl font-bold md:text-3xl">{featuredPost.title}</h2>
-                <p className="mb-6 text-muted-foreground">{featuredPost.excerpt}</p>
-                <div className="mb-6 flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {featuredPost.date}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {featuredPost.readTime}
-                  </div>
-                </div>
-                <Button asChild>
-                  <Link href={`/blog/${featuredPost.slug}`}>
-                    Read Article <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      {/* Recent Posts */}
-      <section className="border-t border-border py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-3xl font-bold">Recent Articles</h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
-              <Card key={post.slug} className="overflow-hidden border-border bg-card transition-all hover:shadow-lg">
-                <img src={post.image || "/placeholder.svg"} alt={post.title} className="h-48 w-full object-cover" />
+              <Card
+                key={post.title}
+                className="border-gold-dark/30 bg-card/50 backdrop-blur transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/20"
+              >
+                <div className="relative h-48 overflow-hidden rounded-t-lg">
+                  <Image src={post.image || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
+                  <div className="absolute right-4 top-4">
+                    <span className="rounded-full bg-gold px-3 py-1 text-xs font-semibold text-black">
+                      {post.category}
+                    </span>
+                  </div>
+                </div>
                 <CardContent className="p-6">
-                  <div className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                    {post.category}
-                  </div>
-                  <h3 className="mb-3 text-balance text-xl font-semibold">{post.title}</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">{post.excerpt}</p>
-                  <div className="mb-4 flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="mb-3 flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {post.date}
+                      <Calendar className="h-4 w-4" />
+                      <span>{post.date}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {post.readTime}
+                      <Clock className="h-4 w-4" />
+                      <span>{post.readTime}</span>
                     </div>
                   </div>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="inline-flex items-center text-sm font-semibold text-primary hover:underline"
+                  <h3 className="mb-2 text-xl font-semibold text-white">{post.title}</h3>
+                  <p className="mb-4 text-muted-foreground">{post.excerpt}</p>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="group p-0 text-gold hover:bg-transparent hover:text-gold-dark"
                   >
-                    Read More <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
+                    <Link href="#" className="flex items-center gap-2">
+                      Read More
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -196,25 +128,7 @@ export default function BlogPage() {
         </div>
       </section>
 
-      {/* Newsletter CTA */}
-      <section className="border-t border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-3xl font-bold">Never Miss an Update</h2>
-            <p className="mb-8 text-muted-foreground">
-              Subscribe to our newsletter for weekly tips, strategies, and insights delivered to your inbox.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-80"
-              />
-              <Button>Subscribe</Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }

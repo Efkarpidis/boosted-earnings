@@ -4,79 +4,79 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Custom Boosted Earnings theme with black background and gold accents */
-  --background: oklch(0.1 0 0); /* Deep black */
-  --foreground: oklch(0.98 0 0); /* Off-white text */
-  --card: oklch(0.15 0 0); /* Slightly lighter black for cards */
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.78 0.12 85); /* Gold #EDCA3F */
-  --primary-foreground: oklch(0.1 0 0); /* Black text on gold */
-  --secondary: oklch(0.65 0.11 75); /* Darker gold #CA9825 */
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.25 0 0); /* Dark gray */
-  --muted-foreground: oklch(0.65 0 0); /* Medium gray text */
-  --accent: oklch(0.78 0.12 85); /* Gold accent */
-  --accent-foreground: oklch(0.1 0 0);
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.25 0 0); /* Dark border */
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.78 0.12 85); /* Gold ring */
-  --chart-1: oklch(0.78 0.12 85); /* Gold */
-  --chart-2: oklch(0.55 0.18 220); /* Blue */
-  --chart-3: oklch(0.65 0.11 75); /* Secondary gold */
-  --chart-4: oklch(0.6 0.15 160); /* Teal */
-  --chart-5: oklch(0.7 0.14 50); /* Orange */
+  /* Custom Boosted Earnings color scheme with black background and gold accents */
+  --background: #0f0f0f;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --primary: #edca3f;
+  --primary-foreground: #0f0f0f;
+  --secondary: #ca9825;
+  --secondary-foreground: #ffffff;
+  --muted: #2a2a2a;
+  --muted-foreground: #a0a0a0;
+  --accent: #edca3f;
+  --accent-foreground: #0f0f0f;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: #ca9825;
+  --input: #2a2a2a;
+  --ring: #edca3f;
+  --chart-1: #edca3f;
+  --chart-2: #ca9825;
+  --chart-3: #ffd700;
+  --chart-4: #b8860b;
+  --chart-5: #daa520;
   --radius: 0.5rem;
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #1a1a1a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #edca3f;
+  --sidebar-primary-foreground: #0f0f0f;
+  --sidebar-accent: #2a2a2a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #ca9825;
+  --sidebar-ring: #edca3f;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #0f0f0f;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --primary: #edca3f;
+  --primary-foreground: #0f0f0f;
+  --secondary: #ca9825;
+  --secondary-foreground: #ffffff;
+  --muted: #2a2a2a;
+  --muted-foreground: #a0a0a0;
+  --accent: #edca3f;
+  --accent-foreground: #0f0f0f;
   --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --destructive-foreground: #ffffff;
+  --border: #ca9825;
+  --input: #2a2a2a;
+  --ring: #edca3f;
+  --chart-1: #edca3f;
+  --chart-2: #ca9825;
+  --chart-3: #ffd700;
+  --chart-4: #b8860b;
+  --chart-5: #daa520;
+  --sidebar: #1a1a1a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #edca3f;
+  --sidebar-primary-foreground: #0f0f0f;
+  --sidebar-accent: #2a2a2a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #ca9825;
+  --sidebar-ring: #edca3f;
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: "Poppins", var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -114,6 +114,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  /* Custom gold color utilities */
+  --color-gold: #edca3f;
+  --color-gold-dark: #ca9825;
 }
 
 @layer base {
@@ -121,6 +124,60 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Custom gold text utilities */
+  .text-gold {
+    color: #edca3f;
+  }
+
+  .text-gold-dark {
+    color: #ca9825;
+  }
+
+  /* Gold glow effects for high-tech matrix-like UI */
+  .glow-gold {
+    text-shadow: 0 0 10px rgba(237, 202, 63, 0.5), 0 0 20px rgba(237, 202, 63, 0.3);
+  }
+
+  .border-gold {
+    border-color: #edca3f;
+  }
+
+  .border-gold-dark {
+    border-color: #ca9825;
+  }
+
+  /* Smooth animations */
+  * {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Custom checkbox styling with visible gold outline */
+  input[type="checkbox"] {
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #edca3f;
+    border-radius: 0.25rem;
+    background-color: transparent;
+    cursor: pointer;
+    position: relative;
+  }
+
+  input[type="checkbox"]:checked {
+    background-color: #edca3f;
+  }
+
+  input[type="checkbox"]:checked::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #0f0f0f;
+    font-weight: bold;
+    font-size: 0.875rem;
   }
 }

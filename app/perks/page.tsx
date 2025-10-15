@@ -1,221 +1,104 @@
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import {
-  Percent,
-  Shield,
-  Zap,
-  Gift,
-  TrendingUp,
-  Users,
-  Car,
-  Smartphone,
-  CreditCard,
-  Fuel,
-  Wrench,
-  Coffee,
-} from "lucide-react"
+import { Gift, Percent, Star, Award, Zap, Users } from "lucide-react"
 
 export default function PerksPage() {
   const perks = [
     {
-      icon: Percent,
-      title: "Exclusive Discounts",
-      description: "Save on gas, car maintenance, insurance, and more",
-      benefits: [
-        "Up to 25¢/gallon off at Shell, BP, and Chevron",
-        "15% off oil changes at Jiffy Lube",
-        "20% off car washes nationwide",
-        "10% off at AutoZone and O'Reilly Auto Parts",
-      ],
+      icon: Gift,
+      title: "Beta Tester Rewards",
+      description:
+        "Join our beta program and receive exclusive lifetime discounts, early access to new features, and special recognition in our community.",
     },
     {
-      icon: Shield,
-      title: "Insurance Benefits",
-      description: "Special rates on rideshare insurance",
-      benefits: [
-        "Exclusive rates with top insurers",
-        "Rideshare-specific coverage",
-        "Instant quotes and comparison",
-        "Save up to $500/year on premiums",
-      ],
+      icon: Percent,
+      title: "Partner Discounts",
+      description:
+        "Save money with exclusive discounts from our partners including gas stations, car maintenance services, insurance providers, and more.",
+    },
+    {
+      icon: Star,
+      title: "Referral Program",
+      description:
+        "Earn rewards by referring other drivers. Get $10 credit for each friend who signs up, and they get a discount too!",
+    },
+    {
+      icon: Award,
+      title: "Achievement Badges",
+      description:
+        "Unlock special badges and achievements as you hit earnings milestones. Show off your success and compete with other drivers.",
     },
     {
       icon: Zap,
-      title: "Earnings Guarantees",
-      description: "Protect your income with our guarantee program",
-      benefits: [
-        "Minimum earnings guarantee",
-        "Surge protection alerts",
-        "Bonus opportunity notifications",
-        "Peak hour recommendations",
-      ],
-    },
-    {
-      icon: Gift,
-      title: "Rewards Program",
-      description: "Earn points for every mile driven",
-      benefits: ["1 point per mile driven", "Redeem for gift cards", "Cash back options", "Exclusive partner offers"],
-    },
-    {
-      icon: TrendingUp,
-      title: "Premium Analytics",
-      description: "Advanced insights to boost your earnings",
-      benefits: [
-        "Predictive earnings forecasts",
-        "Custom performance reports",
-        "Competitor benchmarking",
-        "Market trend analysis",
-      ],
+      title: "Priority Features",
+      description:
+        "Pro members get early access to new features, priority customer support, and the ability to request custom features.",
     },
     {
       icon: Users,
       title: "Community Access",
-      description: "Join our exclusive driver community",
-      benefits: [
-        "Private Facebook group",
-        "Monthly webinars with experts",
-        "Networking events",
-        "Tips from top earners",
-      ],
+      description:
+        "Join our exclusive driver community to share tips, strategies, and connect with other successful rideshare drivers.",
+    },
+  ]
+
+  const partnerDeals = [
+    {
+      partner: "Shell Gas Stations",
+      discount: "5% off all fuel purchases",
+      description: "Save on every fill-up with our Shell partnership",
     },
     {
-      icon: Car,
-      title: "Vehicle Perks",
-      description: "Special deals on vehicle-related services",
-      benefits: [
-        "Discounted car rentals",
-        "Free vehicle inspections",
-        "Tire rotation discounts",
-        "Detailing service deals",
-      ],
+      partner: "Jiffy Lube",
+      discount: "$10 off oil changes",
+      description: "Keep your car running smoothly with discounted maintenance",
     },
     {
-      icon: Smartphone,
-      title: "Tech Discounts",
-      description: "Save on phones, accessories, and more",
-      benefits: [
-        "20% off phone mounts and chargers",
-        "Discounted dash cams",
-        "Free phone insurance trial",
-        "Data plan discounts",
-      ],
+      partner: "Geico Insurance",
+      discount: "15% off rideshare insurance",
+      description: "Protect yourself with specialized rideshare coverage",
     },
     {
-      icon: CreditCard,
-      title: "Financial Services",
-      description: "Access to financial tools and services",
-      benefits: [
-        "No-fee business checking",
-        "Early direct deposit",
-        "Tax preparation discounts",
-        "Accounting software deals",
-      ],
-    },
-    {
-      icon: Fuel,
-      title: "Fuel Rewards",
-      description: "Save money every time you fill up",
-      benefits: [
-        "Automatic fuel tracking",
-        "Best price finder",
-        "Loyalty program integration",
-        "Cash back on fuel purchases",
-      ],
-    },
-    {
-      icon: Wrench,
-      title: "Maintenance Plans",
-      description: "Keep your vehicle in top shape",
-      benefits: [
-        "Discounted maintenance packages",
-        "Free inspection reminders",
-        "Priority service booking",
-        "Extended warranty options",
-      ],
-    },
-    {
-      icon: Coffee,
-      title: "Lifestyle Benefits",
-      description: "Perks for your everyday life",
-      benefits: [
-        "10% off at Starbucks",
-        "Gym membership discounts",
-        "Meal delivery service deals",
-        "Entertainment subscriptions",
-      ],
+      partner: "Car Wash Nation",
+      discount: "Unlimited washes for $19.99/month",
+      description: "Keep your car clean and professional-looking",
     },
   ]
 
   return (
-    <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="border-b border-border py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="mb-4 text-balance text-4xl font-bold md:text-5xl">
-              Exclusive <span className="text-primary">Driver Perks</span>
-            </h1>
-            <p className="mb-8 text-pretty text-lg text-muted-foreground">
-              Save thousands every year with exclusive discounts, rewards, and benefits designed specifically for gig
-              drivers.
-            </p>
-            <Button asChild size="lg">
-              <Link href="/beta-signup">Unlock All Perks</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-black">
+      <Header />
 
-      {/* Savings Calculator */}
-      <section className="border-b border-border bg-card py-16">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="mb-8 text-center text-2xl font-bold">Average Annual Savings</h2>
-            <div className="grid gap-6 md:grid-cols-4">
-              <div className="text-center">
-                <div className="mb-2 text-3xl font-bold text-primary">$1,200</div>
-                <div className="text-sm text-muted-foreground">Fuel Discounts</div>
-              </div>
-              <div className="text-center">
-                <div className="mb-2 text-3xl font-bold text-primary">$800</div>
-                <div className="text-sm text-muted-foreground">Maintenance Savings</div>
-              </div>
-              <div className="text-center">
-                <div className="mb-2 text-3xl font-bold text-primary">$500</div>
-                <div className="text-sm text-muted-foreground">Insurance Savings</div>
-              </div>
-              <div className="text-center">
-                <div className="mb-2 text-3xl font-bold text-primary">$2,500+</div>
-                <div className="text-sm text-muted-foreground">Total Savings</div>
-              </div>
-            </div>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-gold-dark/20 bg-gradient-to-b from-black via-black to-black/95">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
+        <div className="container relative mx-auto px-4 py-24">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="mb-6 text-5xl font-bold leading-tight text-white glow-gold md:text-6xl">
+              Member Perks & Benefits
+            </h1>
+            <p className="text-xl text-gold">More than just a dashboard - exclusive benefits for our members</p>
           </div>
         </div>
       </section>
 
       {/* Perks Grid */}
-      <section className="py-20">
+      <section className="border-b border-gold-dark/20 py-20">
         <div className="container mx-auto px-4">
+          <h2 className="mb-12 text-center text-4xl font-bold text-gold glow-gold">Exclusive Member Benefits</h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {perks.map((perk) => {
               const Icon = perk.icon
               return (
-                <Card key={perk.title} className="border-border bg-card">
-                  <CardContent className="pt-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                      <Icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <h3 className="mb-2 text-xl font-semibold">{perk.title}</h3>
-                    <p className="mb-4 text-sm text-muted-foreground">{perk.description}</p>
-                    <ul className="space-y-2">
-                      {perk.benefits.map((benefit) => (
-                        <li key={benefit} className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
+                <Card
+                  key={perk.title}
+                  className="border-gold-dark/30 bg-card/50 backdrop-blur transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/20"
+                >
+                  <CardContent className="p-6">
+                    <Icon className="mb-4 h-12 w-12 text-gold" />
+                    <h3 className="mb-2 text-xl font-semibold text-white">{perk.title}</h3>
+                    <p className="text-muted-foreground">{perk.description}</p>
                   </CardContent>
                 </Card>
               )
@@ -224,75 +107,37 @@ export default function PerksPage() {
         </div>
       </section>
 
-      {/* Featured Partners */}
-      <section className="border-y border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="mb-12 text-center text-3xl font-bold">Our Partners</h2>
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-              {["Shell", "BP", "Jiffy Lube", "AutoZone", "Starbucks", "Geico", "T-Mobile", "Costco"].map((partner) => (
-                <div
-                  key={partner}
-                  className="flex items-center justify-center rounded-lg border border-border bg-background p-6"
-                >
-                  <span className="text-lg font-semibold text-muted-foreground">{partner}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
+      {/* Partner Deals */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="mb-12 text-center text-3xl font-bold">How to Access Your Perks</h2>
-            <div className="grid gap-8 md:grid-cols-3">
-              <div className="text-center">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mx-auto">
-                  <span className="text-xl font-bold text-primary">1</span>
-                </div>
-                <h3 className="mb-2 font-semibold">Sign Up</h3>
-                <p className="text-sm text-muted-foreground">
-                  Create your Boosted Earnings account and verify your driver status
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mx-auto">
-                  <span className="text-xl font-bold text-primary">2</span>
-                </div>
-                <h3 className="mb-2 font-semibold">Browse Perks</h3>
-                <p className="text-sm text-muted-foreground">
-                  Explore available discounts and benefits in your dashboard
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mx-auto">
-                  <span className="text-xl font-bold text-primary">3</span>
-                </div>
-                <h3 className="mb-2 font-semibold">Start Saving</h3>
-                <p className="text-sm text-muted-foreground">Activate offers and start saving on every purchase</p>
-              </div>
-            </div>
+          <h2 className="mb-12 text-center text-4xl font-bold text-gold glow-gold">Partner Deals</h2>
+          <div className="mx-auto max-w-4xl space-y-6">
+            {partnerDeals.map((deal) => (
+              <Card key={deal.partner} className="border-gold-dark/30 bg-card/50 backdrop-blur">
+                <CardContent className="p-6">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <h3 className="mb-1 text-xl font-semibold text-gold">{deal.partner}</h3>
+                      <p className="mb-2 text-lg font-medium text-white">{deal.discount}</p>
+                      <p className="text-sm text-muted-foreground">{deal.description}</p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <span className="inline-block rounded-full bg-gold px-4 py-2 text-sm font-semibold text-black">
+                        Active Deal
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+          <p className="mt-8 text-center text-muted-foreground">
+            More partner deals coming soon! We're constantly negotiating new discounts for our members.
+          </p>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="border-t border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-3xl font-bold">Ready to Start Saving?</h2>
-            <p className="mb-8 text-muted-foreground">
-              Join Boosted Earnings today and unlock exclusive perks worth thousands of dollars per year.
-            </p>
-            <Button asChild size="lg">
-              <Link href="/beta-signup">Get Started Free</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }

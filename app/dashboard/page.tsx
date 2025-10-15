@@ -1,437 +1,386 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState } from "react"
+import { ProtectedRoute } from "@/components/protected-route"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { DollarSign, TrendingUp, MapPin, Calendar, Clock, Target, ArrowUp, ArrowDown } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DollarSign, TrendingUp, Clock, LinkIcon, Calendar } from "lucide-react"
 import {
   LineChart,
   Line,
   BarChart,
   Bar,
-  AreaChart,
-  Area,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
+  Area,
+  AreaChart,
 } from "recharts"
 
+// Sample data for charts
+const earningsData = [
+  { date: "Mon", uber: 245, lyft: 180, doordash: 95 },
+  { date: "Tue", uber: 280, lyft: 210, doordash: 120 },
+  { date: "Wed", uber: 310, lyft: 195, doordash: 110 },
+  { date: "Thu", uber: 290, lyft: 220, doordash: 130 },
+  { date: "Fri", uber: 380, lyft: 290, doordash: 160 },
+  { date: "Sat", uber: 420, lyft: 340, doordash: 180 },
+  { date: "Sun", uber: 390, lyft: 310, doordash: 150 },
+]
+
+const platformData = [
+  { name: "Uber", value: 2315, color: "#EDCA3F" },
+  { name: "Lyft", value: 1745, color: "#CA9825" },
+  { name: "DoorDash", value: 945, color: "#FFD700" },
+]
+
+const hourlyData = [
+  { hour: "6am", earnings: 45 },
+  { hour: "9am", earnings: 85 },
+  { hour: "12pm", earnings: 120 },
+  { hour: "3pm", earnings: 95 },
+  { hour: "6pm", earnings: 150 },
+  { hour: "9pm", earnings: 180 },
+  { hour: "12am", earnings: 90 },
+]
+
+const expenseData = [
+  { category: "Gas", amount: 450 },
+  { category: "Maintenance", amount: 200 },
+  { category: "Insurance", amount: 150 },
+  { category: "Car Wash", amount: 60 },
+  { category: "Other", amount: 80 },
+]
+
 export default function DashboardPage() {
-  // Sample data - in production, this would come from API
-  const earningsData = [
-    { date: "Mon", earnings: 245, trips: 18 },
-    { date: "Tue", earnings: 312, trips: 22 },
-    { date: "Wed", earnings: 289, trips: 20 },
-    { date: "Thu", earnings: 356, trips: 25 },
-    { date: "Fri", earnings: 423, trips: 31 },
-    { date: "Sat", earnings: 512, trips: 38 },
-    { date: "Sun", earnings: 467, trips: 34 },
-  ]
+  const [timeRange, setTimeRange] = useState("week")
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
 
-  const hourlyData = [
-    { hour: "6AM", earnings: 45 },
-    { hour: "9AM", earnings: 78 },
-    { hour: "12PM", earnings: 92 },
-    { hour: "3PM", earnings: 65 },
-    { hour: "6PM", earnings: 125 },
-    { hour: "9PM", earnings: 98 },
-    { hour: "12AM", earnings: 87 },
-  ]
+  const totalEarnings = 5005
+  const totalExpenses = 940
+  const netProfit = totalEarnings - totalExpenses
+  const hoursWorked = 42
+  const hourlyRate = (netProfit / hoursWorked).toFixed(2)
 
-  const platformData = [
-    { name: "Uber", value: 1245, color: "#000000" },
-    { name: "Lyft", value: 892, color: "#FF00BF" },
-    { name: "DoorDash", value: 567, color: "#FF3008" },
-  ]
-
-  const topZones = [
-    { zone: "Downtown", earnings: "$1,234", trips: 45 },
-    { zone: "Airport", earnings: "$987", trips: 32 },
-    { zone: "University District", earnings: "$756", trips: 38 },
-    { zone: "Financial District", earnings: "$654", trips: 28 },
-    { zone: "Entertainment District", earnings: "$543", trips: 25 },
-  ]
-
-  const upcomingSchedule = [
-    { day: "Monday", shift: "7:00 AM - 11:00 AM", goal: "$250" },
-    { day: "Tuesday", shift: "5:00 PM - 10:00 PM", goal: "$300" },
-    { day: "Friday", shift: "6:00 PM - 2:00 AM", goal: "$450" },
-    { day: "Saturday", shift: "10:00 AM - 6:00 PM", goal: "$500" },
-  ]
+  const handleConnectPlatform = (platform: string) => {
+    // TODO: Implement Argyle/Plaid integration
+    console.log("[v0] Connecting platform:", platform)
+    alert(`Connecting to ${platform}... This will integrate with Argyle API for earnings data.`)
+    setConnectedPlatforms([...connectedPlatforms, platform])
+  }
 
   return (
-    <div className="flex flex-col">
-      {/* Header */}
-      <section className="border-b border-border bg-card py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-black">
+        <Header />
+
+        <div className="container mx-auto px-4 py-8">
+          {/* Dashboard Header */}
+          <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back! Here's your earnings overview.</p>
+              <h1 className="mb-2 text-4xl font-bold text-gold glow-gold">Earnings Dashboard</h1>
+              <p className="text-muted-foreground">Track your rideshare earnings in real-time</p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline">Export Data</Button>
-              <Button>Connect Platform</Button>
+            <div className="flex items-center gap-4">
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="w-40 border-gold-dark/50 bg-black/50 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Stats Overview */}
-      <section className="py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-border bg-card">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-                <DollarSign className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$2,604</div>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <ArrowUp className="h-3 w-3 text-green-500" />
-                  <span className="text-green-500">+12.5%</span> from last week
-                </p>
+          {/* Stats Cards */}
+          <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="border-gold-dark/30 bg-gradient-to-br from-card/50 to-card/30 backdrop-blur">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Earnings</p>
+                    <p className="text-3xl font-bold text-gold">${totalEarnings}</p>
+                  </div>
+                  <DollarSign className="h-12 w-12 text-gold/50" />
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="border-border bg-card">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Trips</CardTitle>
-                <TrendingUp className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">188</div>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <ArrowUp className="h-3 w-3 text-green-500" />
-                  <span className="text-green-500">+8.2%</span> from last week
-                </p>
+            <Card className="border-gold-dark/30 bg-gradient-to-br from-card/50 to-card/30 backdrop-blur">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Net Profit</p>
+                    <p className="text-3xl font-bold text-green-500">${netProfit}</p>
+                  </div>
+                  <TrendingUp className="h-12 w-12 text-green-500/50" />
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="border-border bg-card">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Avg Per Trip</CardTitle>
-                <Target className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$13.85</div>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <ArrowUp className="h-3 w-3 text-green-500" />
-                  <span className="text-green-500">+3.8%</span> from last week
-                </p>
+            <Card className="border-gold-dark/30 bg-gradient-to-br from-card/50 to-card/30 backdrop-blur">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Hourly Rate</p>
+                    <p className="text-3xl font-bold text-gold">${hourlyRate}/hr</p>
+                  </div>
+                  <Clock className="h-12 w-12 text-gold/50" />
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="border-border bg-card">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Hours Driven</CardTitle>
-                <Clock className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">42.5</div>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <ArrowDown className="h-3 w-3 text-red-500" />
-                  <span className="text-red-500">-5.2%</span> from last week
-                </p>
+            <Card className="border-gold-dark/30 bg-gradient-to-br from-card/50 to-card/30 backdrop-blur">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Hours Worked</p>
+                    <p className="text-3xl font-bold text-white">{hoursWorked}h</p>
+                  </div>
+                  <Calendar className="h-12 w-12 text-white/50" />
+                </div>
               </CardContent>
             </Card>
           </div>
-        </div>
-      </section>
 
-      {/* Main Content */}
-      <section className="pb-8">
-        <div className="container mx-auto px-4">
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="schedule">Schedule</TabsTrigger>
-              <TabsTrigger value="zones">Top Zones</TabsTrigger>
+          {/* Platform Connection Cards */}
+          <Card className="mb-8 border-gold-dark/30 bg-card/50 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-gold">
+                <LinkIcon className="h-5 w-5" />
+                Connect Your Platforms
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <Button
+                  onClick={() => handleConnectPlatform("Uber")}
+                  disabled={connectedPlatforms.includes("Uber")}
+                  className="bg-gold text-black hover:bg-gold-dark disabled:opacity-50"
+                >
+                  {connectedPlatforms.includes("Uber") ? "✓ Uber Connected" : "Connect Uber"}
+                </Button>
+                <Button
+                  onClick={() => handleConnectPlatform("Lyft")}
+                  disabled={connectedPlatforms.includes("Lyft")}
+                  className="bg-gold text-black hover:bg-gold-dark disabled:opacity-50"
+                >
+                  {connectedPlatforms.includes("Lyft") ? "✓ Lyft Connected" : "Connect Lyft"}
+                </Button>
+                <Button
+                  onClick={() => handleConnectPlatform("DoorDash")}
+                  disabled={connectedPlatforms.includes("DoorDash")}
+                  className="bg-gold text-black hover:bg-gold-dark disabled:opacity-50"
+                >
+                  {connectedPlatforms.includes("DoorDash") ? "✓ DoorDash Connected" : "Connect DoorDash"}
+                </Button>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Connect your platforms to automatically sync earnings data via Argyle integration
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Charts Tabs */}
+          <Tabs defaultValue="earnings" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4 bg-card/50 lg:w-auto lg:inline-grid">
+              <TabsTrigger value="earnings" className="data-[state=active]:bg-gold data-[state=active]:text-black">
+                Earnings
+              </TabsTrigger>
+              <TabsTrigger value="platforms" className="data-[state=active]:bg-gold data-[state=active]:text-black">
+                Platforms
+              </TabsTrigger>
+              <TabsTrigger value="hourly" className="data-[state=active]:bg-gold data-[state=active]:text-black">
+                Hourly
+              </TabsTrigger>
+              <TabsTrigger value="expenses" className="data-[state=active]:bg-gold data-[state=active]:text-black">
+                Expenses
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid gap-6 lg:grid-cols-2">
-                {/* Weekly Earnings Chart */}
-                <Card className="border-border bg-card">
-                  <CardHeader>
-                    <CardTitle>Weekly Earnings</CardTitle>
-                    <CardDescription>Your earnings over the past 7 days</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={earningsData}>
-                        <defs>
-                          <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                        <YAxis stroke="hsl(var(--muted-foreground))" />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                          }}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="earnings"
-                          stroke="hsl(var(--primary))"
-                          fillOpacity={1}
-                          fill="url(#colorEarnings)"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                {/* Platform Breakdown */}
-                <Card className="border-border bg-card">
-                  <CardHeader>
-                    <CardTitle>Platform Breakdown</CardTitle>
-                    <CardDescription>Earnings by platform this week</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-center">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie
-                            data={platformData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={100}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {platformData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "hsl(var(--card))",
-                              border: "1px solid hsl(var(--border))",
-                              borderRadius: "8px",
-                            }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="mt-4 space-y-2">
-                      {platformData.map((platform) => (
-                        <div key={platform.name} className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: platform.color }} />
-                            <span>{platform.name}</span>
-                          </div>
-                          <span className="font-semibold">${platform.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Hourly Performance */}
-              <Card className="border-border bg-card">
+            {/* Earnings Chart */}
+            <TabsContent value="earnings">
+              <Card className="border-gold-dark/30 bg-card/50 backdrop-blur">
                 <CardHeader>
-                  <CardTitle>Hourly Performance</CardTitle>
-                  <CardDescription>Average earnings by hour of day</CardDescription>
+                  <CardTitle className="text-gold">Daily Earnings Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={hourlyData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" />
-                      <YAxis stroke="hsl(var(--muted-foreground))" />
+                  <ResponsiveContainer width="100%" height={400}>
+                    <AreaChart data={earningsData}>
+                      <defs>
+                        <linearGradient id="colorUber" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#EDCA3F" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#EDCA3F" stopOpacity={0.1} />
+                        </linearGradient>
+                        <linearGradient id="colorLyft" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#CA9825" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#CA9825" stopOpacity={0.1} />
+                        </linearGradient>
+                        <linearGradient id="colorDoorDash" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#FFD700" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#FFD700" stopOpacity={0.1} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#CA9825" opacity={0.1} />
+                      <XAxis dataKey="date" stroke="#EDCA3F" />
+                      <YAxis stroke="#EDCA3F" />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
+                          backgroundColor: "#1a1a1a",
+                          border: "1px solid #CA9825",
                           borderRadius: "8px",
+                          color: "#ffffff",
                         }}
                       />
-                      <Bar dataKey="earnings" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-                    </BarChart>
+                      <Legend />
+                      <Area
+                        type="monotone"
+                        dataKey="uber"
+                        stroke="#EDCA3F"
+                        fillOpacity={1}
+                        fill="url(#colorUber)"
+                        strokeWidth={2}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="lyft"
+                        stroke="#CA9825"
+                        fillOpacity={1}
+                        fill="url(#colorLyft)"
+                        strokeWidth={2}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="doordash"
+                        stroke="#FFD700"
+                        fillOpacity={1}
+                        fill="url(#colorDoorDash)"
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="analytics" className="space-y-6">
-              <div className="grid gap-6 lg:grid-cols-2">
-                <Card className="border-border bg-card">
-                  <CardHeader>
-                    <CardTitle>Trip Volume Trends</CardTitle>
-                    <CardDescription>Number of trips completed per day</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={earningsData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                        <YAxis stroke="hsl(var(--muted-foreground))" />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="trips"
-                          stroke="hsl(var(--primary))"
-                          strokeWidth={2}
-                          dot={{ fill: "hsl(var(--primary))" }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border bg-card">
-                  <CardHeader>
-                    <CardTitle>Performance Metrics</CardTitle>
-                    <CardDescription>Key performance indicators</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Acceptance Rate</span>
-                      <span className="text-lg font-semibold">87%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-muted">
-                      <div className="h-2 w-[87%] rounded-full bg-primary" />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Customer Rating</span>
-                      <span className="text-lg font-semibold">4.92 ★</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-muted">
-                      <div className="h-2 w-[98%] rounded-full bg-primary" />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Cancellation Rate</span>
-                      <span className="text-lg font-semibold">3%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-muted">
-                      <div className="h-2 w-[3%] rounded-full bg-destructive" />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">On-Time Rate</span>
-                      <span className="text-lg font-semibold">96%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-muted">
-                      <div className="h-2 w-[96%] rounded-full bg-primary" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="schedule" className="space-y-6">
-              <Card className="border-border bg-card">
+            {/* Platform Distribution Chart */}
+            <TabsContent value="platforms">
+              <Card className="border-gold-dark/30 bg-card/50 backdrop-blur">
                 <CardHeader>
-                  <CardTitle>Upcoming Schedule</CardTitle>
-                  <CardDescription>Your planned driving shifts and goals</CardDescription>
+                  <CardTitle className="text-gold">Earnings by Platform</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {upcomingSchedule.map((schedule, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
+                  <ResponsiveContainer width="100%" height={400}>
+                    <PieChart>
+                      <Pie
+                        data={platformData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                            <Calendar className="h-6 w-6 text-primary" />
-                          </div>
-                          <div>
-                            <div className="font-semibold">{schedule.day}</div>
-                            <div className="text-sm text-muted-foreground">{schedule.shift}</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm text-muted-foreground">Goal</div>
-                          <div className="font-semibold text-primary">{schedule.goal}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Button className="mt-6 w-full">Add New Shift</Button>
+                        {platformData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1a1a1a",
+                          border: "1px solid #CA9825",
+                          borderRadius: "8px",
+                          color: "#ffffff",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="zones" className="space-y-6">
-              <Card className="border-border bg-card">
+            {/* Hourly Earnings Chart */}
+            <TabsContent value="hourly">
+              <Card className="border-gold-dark/30 bg-card/50 backdrop-blur">
                 <CardHeader>
-                  <CardTitle>Top Earning Zones</CardTitle>
-                  <CardDescription>Your most profitable areas this week</CardDescription>
+                  <CardTitle className="text-gold">Peak Hours Analysis</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {topZones.map((zone, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                            <span className="font-bold text-primary">#{index + 1}</span>
-                          </div>
-                          <div>
-                            <div className="font-semibold">{zone.zone}</div>
-                            <div className="text-sm text-muted-foreground">{zone.trips} trips</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-primary">{zone.earnings}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <LineChart data={hourlyData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#CA9825" opacity={0.1} />
+                      <XAxis dataKey="hour" stroke="#EDCA3F" />
+                      <YAxis stroke="#EDCA3F" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1a1a1a",
+                          border: "1px solid #CA9825",
+                          borderRadius: "8px",
+                          color: "#ffffff",
+                        }}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="earnings"
+                        stroke="#EDCA3F"
+                        strokeWidth={3}
+                        dot={{ fill: "#EDCA3F", r: 6 }}
+                        activeDot={{ r: 8 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
+            </TabsContent>
 
-              {/* Heat Map Placeholder */}
-              <Card className="border-border bg-card">
+            {/* Expenses Chart */}
+            <TabsContent value="expenses">
+              <Card className="border-gold-dark/30 bg-card/50 backdrop-blur">
                 <CardHeader>
-                  <CardTitle>Earnings Heat Map</CardTitle>
-                  <CardDescription>Visual representation of high-earning areas</CardDescription>
+                  <CardTitle className="text-gold">Expense Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex h-[400px] items-center justify-center rounded-lg bg-muted">
-                    <div className="text-center">
-                      <MapPin className="mx-auto mb-2 h-12 w-12 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        Interactive map coming soon
-                        <br />
-                        Connect your account to see real-time heat maps
-                      </p>
-                    </div>
-                  </div>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={expenseData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#CA9825" opacity={0.1} />
+                      <XAxis dataKey="category" stroke="#EDCA3F" />
+                      <YAxis stroke="#EDCA3F" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1a1a1a",
+                          border: "1px solid #CA9825",
+                          borderRadius: "8px",
+                          color: "#ffffff",
+                        }}
+                      />
+                      <Legend />
+                      <Bar dataKey="amount" fill="#EDCA3F" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
         </div>
-      </section>
-    </div>
+
+        <Footer />
+      </div>
+    </ProtectedRoute>
   )
 }
