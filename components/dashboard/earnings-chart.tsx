@@ -5,11 +5,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface EarningsChartProps {
   timeRange: string
+  data?: any[]
 }
 
-export function EarningsChart({ timeRange }: EarningsChartProps) {
-  // Mock data - in production this would come from API
-  const data = [
+export function EarningsChart({ timeRange, data }: EarningsChartProps) {
+  const chartData = data || [
     { name: "Mon", earnings: 420, hours: 8 },
     { name: "Tue", earnings: 380, hours: 7 },
     { name: "Wed", earnings: 510, hours: 9 },
@@ -26,7 +26,7 @@ export function EarningsChart({ timeRange }: EarningsChartProps) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+          <LineChart data={chartData}>
             <defs>
               <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#EDCA3F" stopOpacity={0.8} />

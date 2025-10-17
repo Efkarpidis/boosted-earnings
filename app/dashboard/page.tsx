@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,9 +17,58 @@ function DashboardContent() {
   const { user } = useAuth()
   const [timeRange, setTimeRange] = useState("week")
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
+  const [earningsData, setEarningsData] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [accountId, setAccountId] = useState<string | null>(null)
 
-  // Mock data - in production this would come from API/database
-  const stats = {
+  useEffect(() => {
+    if (accountId) {
+      fetchEarningsData()
+    }
+  }, [accountId, timeRange])
+
+  const fetchEarningsData = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/argyle/earnings?accountId=${accountId}&timeRange=${timeRange}`)
+      const data = await response.json()
+      setEarningsData(data)
+    } catch (error) {
+      console.error("Error fetching earnings:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleConnectPlatform = async (platform: string) => {
+    if (connectedPlatforms.includes(platform)) return
+
+    setLoading(true)
+    try {
+      const response = await fetch("/api/argyle/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform, userId: user?.uid }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setConnectedPlatforms([...connectedPlatforms, platform])
+        if (data.accountId) {
+          setAccountId(data.accountId)
+        }
+        // In production, you would open Argyle Link UI here
+        console.log("Platform connected:", data)
+      }
+    } catch (error) {
+      console.error("Error connecting platform:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const stats = earningsData || {
     totalEarnings: 2847.5,
     earningsChange: 12.5,
     hoursWorked: 42.5,
@@ -28,14 +77,6 @@ function DashboardContent() {
     avgHourlyChange: 18.7,
     trips: 156,
     tripsChange: 8.3,
-  }
-
-  const handleConnectPlatform = (platform: string) => {
-    // In production, this would trigger OAuth flow for Argyle/Plaid
-    console.log("Connecting to:", platform)
-    if (!connectedPlatforms.includes(platform)) {
-      setConnectedPlatforms([...connectedPlatforms, platform])
-    }
   }
 
   return (
@@ -82,6 +123,7 @@ function DashboardContent() {
                   <Button
                     key={platform}
                     onClick={() => handleConnectPlatform(platform)}
+                    disabled={loading}
                     variant={connectedPlatforms.includes(platform) ? "default" : "outline"}
                     className={
                       connectedPlatforms.includes(platform)
@@ -107,7 +149,7 @@ function DashboardContent() {
                 <p className="text-3xl font-bold text-gold mb-1">${stats.totalEarnings.toFixed(2)}</p>
                 <div className="flex items-center gap-1 text-sm">
                   <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-green-500">+{stats.earningsChange}%</span>
+                  <span className="text-green-500">+{stats.earningsChange || 12.5}%</span>
                   <span className="text-muted-foreground">vs last {timeRange}</span>
                 </div>
               </CardContent>
@@ -122,7 +164,7 @@ function DashboardContent() {
                 <p className="text-3xl font-bold text-foreground mb-1">{stats.hoursWorked}</p>
                 <div className="flex items-center gap-1 text-sm">
                   <TrendingDown className="w-4 h-4 text-red-500" />
-                  <span className="text-red-500">{stats.hoursChange}%</span>
+                  <span className="text-red-500">{stats.hoursChange || -5.2}%</span>
                   <span className="text-muted-foreground">vs last {timeRange}</span>
                 </div>
               </CardContent>
@@ -137,7 +179,7 @@ function DashboardContent() {
                 <p className="text-3xl font-bold text-gold mb-1">${stats.avgHourly.toFixed(2)}</p>
                 <div className="flex items-center gap-1 text-sm">
                   <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-green-500">+{stats.avgHourlyChange}%</span>
+                  <span className="text-green-500">+{stats.avgHourlyChange || 18.7}%</span>
                   <span className="text-muted-foreground">vs last {timeRange}</span>
                 </div>
               </CardContent>
@@ -152,7 +194,7 @@ function DashboardContent() {
                 <p className="text-3xl font-bold text-foreground mb-1">{stats.trips}</p>
                 <div className="flex items-center gap-1 text-sm">
                   <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-green-500">+{stats.tripsChange}%</span>
+                  <span className="text-green-500">+{stats.tripsChange || 8.3}%</span>
                   <span className="text-muted-foreground">vs last {timeRange}</span>
                 </div>
               </CardContent>
@@ -161,12 +203,12 @@ function DashboardContent() {
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <EarningsChart timeRange={timeRange} />
-            <PlatformBreakdown />
+            <EarningsChart timeRange={timeRange} data={earningsData?.dailyData} />
+            <PlatformBreakdown data={earningsData?.breakdown} />
           </div>
 
           {/* Weekly Comparison */}
-          <WeeklyComparison />
+          <WeeklyComparison data={earningsData?.dailyData} />
         </div>
       </div>
 

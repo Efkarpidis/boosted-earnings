@@ -3,14 +3,27 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 
-export function PlatformBreakdown() {
-  // Mock data - in production this would come from API
-  const data = [
+interface PlatformBreakdownProps {
+  data?: Array<{ platform: string; earnings: number; trips: number }>
+}
+
+export function PlatformBreakdown({ data }: PlatformBreakdownProps) {
+  const mockData = [
     { name: "Uber", value: 1200, color: "#EDCA3F" },
     { name: "Lyft", value: 850, color: "#CA9825" },
     { name: "DoorDash", value: 550, color: "#A67C1B" },
     { name: "Uber Eats", value: 247.5, color: "#8B6914" },
   ]
+
+  const colors = ["#EDCA3F", "#CA9825", "#A67C1B", "#8B6914", "#6F5610"]
+
+  const chartData = data
+    ? data.map((item, index) => ({
+        name: item.platform,
+        value: item.earnings,
+        color: colors[index % colors.length],
+      }))
+    : mockData
 
   return (
     <Card className="bg-card/50 backdrop-blur-sm border-gold/20">
@@ -21,7 +34,7 @@ export function PlatformBreakdown() {
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
-              data={data}
+              data={chartData}
               cx="50%"
               cy="50%"
               labelLine={false}
@@ -30,7 +43,7 @@ export function PlatformBreakdown() {
               fill="#8884d8"
               dataKey="value"
             >
-              {data.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} stroke="#0F0F0F" strokeWidth={2} />
               ))}
             </Pie>

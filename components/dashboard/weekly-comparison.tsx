@@ -3,9 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
 
-export function WeeklyComparison() {
-  // Mock data - in production this would come from API
-  const data = [
+interface WeeklyComparisonProps {
+  data?: any[]
+}
+
+export function WeeklyComparison({ data }: WeeklyComparisonProps) {
+  const mockData = [
     { day: "Mon", thisWeek: 420, lastWeek: 380 },
     { day: "Tue", thisWeek: 380, lastWeek: 420 },
     { day: "Wed", thisWeek: 510, lastWeek: 450 },
@@ -15,6 +18,8 @@ export function WeeklyComparison() {
     { day: "Sun", thisWeek: 650, lastWeek: 600 },
   ]
 
+  const chartData = data || mockData
+
   return (
     <Card className="bg-card/50 backdrop-blur-sm border-gold/20">
       <CardHeader>
@@ -22,7 +27,7 @@ export function WeeklyComparison() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={data}>
+          <BarChart data={chartData}>
             <defs>
               <linearGradient id="thisWeekGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#EDCA3F" stopOpacity={0.9} />
