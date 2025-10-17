@@ -11,15 +11,21 @@ import { PlatformBreakdown } from "@/components/dashboard/platform-breakdown"
 import { WeeklyComparison } from "@/components/dashboard/weekly-comparison"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { useAuth } from "@/components/auth/auth-provider"
-import { TrendingUp, DollarSign, Clock, TrendingDown, LinkIcon } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { TrendingUp, DollarSign, Clock, TrendingDown, LinkIcon, AlertCircle } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 function DashboardContent() {
   const { user } = useAuth()
+  const { toast } = useToast()
   const [timeRange, setTimeRange] = useState("week")
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
   const [earningsData, setEarningsData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
   const [accountId, setAccountId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [usingMockData, setUsingMockData] = useState(false)
 
   useEffect(() => {
     if (accountId) {
@@ -29,42 +35,108 @@ function DashboardContent() {
 
   const fetchEarningsData = async () => {
     setLoading(true)
+    setError(null)
     try {
       const response = await fetch(`/api/argyle/earnings?accountId=${accountId}&timeRange=${timeRange}`)
       const data = await response.json()
+
+      if (data.mock) {
+        setUsingMockData(true)
+        toast({
+          title: "Using Mock Data",
+          description: "API credentials not configured. Displaying sample data.",
+          variant: "default",
+        })
+      }
+
       setEarningsData(data)
     } catch (error) {
       console.error("Error fetching earnings:", error)
+      setError("Failed to fetch earnings data. Please try again.")
+      toast({
+        title: "Error",
+        description: "Failed to fetch earnings data. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
   }
 
   const handleConnectPlatform = async (platform: string) => {
-    if (connectedPlatforms.includes(platform)) return
+    if (connectedPlatforms.includes(platform)) {
+      toast({
+        title: "Already Connected",
+        description: `${platform} is already connected to your account.`,
+      })
+      return
+    }
 
-    setLoading(true)
+    setConnectingPlatform(platform)
+    setError(null)
+
     try {
-      const response = await fetch("/api/argyle/connect", {
+      // Step 1: Initialize Argyle connection for earnings data
+      const argyleResponse = await fetch("/api/argyle/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ platform, userId: user?.uid }),
       })
 
-      const data = await response.json()
+      const argyleData = await argyleResponse.json()
 
-      if (data.success) {
-        setConnectedPlatforms([...connectedPlatforms, platform])
-        if (data.accountId) {
-          setAccountId(data.accountId)
-        }
-        // In production, you would open Argyle Link UI here
-        console.log("Platform connected:", data)
+      if (!argyleResponse.ok) {
+        throw new Error(argyleData.error || "Failed to connect to Argyle")
       }
-    } catch (error) {
+
+      if (argyleData.mock) {
+        setUsingMockData(true)
+        toast({
+          title: "Mock Connection",
+          description: `${platform} connected with sample data. Configure API keys for real data.`,
+        })
+      } else {
+        toast({
+          title: "Success!",
+          description: `${platform} connected successfully via Argyle.`,
+        })
+      }
+
+      // Step 2: Initialize Plaid Link for bank data (optional)
+      try {
+        const plaidResponse = await fetch("/api/plaid/link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user?.uid }),
+        })
+
+        const plaidData = await plaidResponse.json()
+
+        if (plaidData.link_token && !plaidData.mock) {
+          // In production, you would open Plaid Link UI here with the link_token
+          console.log("Plaid Link Token:", plaidData.link_token)
+        }
+      } catch (plaidError) {
+        console.log("Plaid connection optional, continuing with Argyle only")
+      }
+
+      // Update state with successful connection
+      setConnectedPlatforms([...connectedPlatforms, platform])
+      if (argyleData.accountId) {
+        setAccountId(argyleData.accountId)
+      }
+    } catch (error: any) {
       console.error("Error connecting platform:", error)
+      const errorMessage = error.message || "Failed to connect platform. Please try again."
+      setError(errorMessage)
+
+      toast({
+        title: "Connection Failed",
+        description: errorMessage,
+        variant: "destructive",
+      })
     } finally {
-      setLoading(false)
+      setConnectingPlatform(null)
     }
   }
 
@@ -106,6 +178,23 @@ function DashboardContent() {
             </Select>
           </div>
 
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {usingMockData && (
+            <Alert className="mb-6 border-gold/30 bg-gold/5">
+              <AlertCircle className="h-4 w-4 text-gold" />
+              <AlertDescription className="text-foreground">
+                You're viewing sample data. Connect your platforms and configure API keys (ARGYLE_API_KEY,
+                PLAID_CLIENT_ID) to see real earnings.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Connect Platforms Section */}
           <Card className="bg-card/50 backdrop-blur-sm border-gold/20 mb-8">
             <CardHeader>
@@ -123,7 +212,7 @@ function DashboardContent() {
                   <Button
                     key={platform}
                     onClick={() => handleConnectPlatform(platform)}
-                    disabled={loading}
+                    disabled={connectingPlatform !== null}
                     variant={connectedPlatforms.includes(platform) ? "default" : "outline"}
                     className={
                       connectedPlatforms.includes(platform)
@@ -131,7 +220,16 @@ function DashboardContent() {
                         : "border-gold text-gold hover:bg-gold hover:text-black bg-transparent"
                     }
                   >
-                    {connectedPlatforms.includes(platform) ? `✓ ${platform}` : `Connect ${platform}`}
+                    {connectingPlatform === platform ? (
+                      <>
+                        <span className="animate-spin mr-2">⏳</span>
+                        Connecting...
+                      </>
+                    ) : connectedPlatforms.includes(platform) ? (
+                      `✓ ${platform}`
+                    ) : (
+                      `Connect ${platform}`
+                    )}
                   </Button>
                 ))}
               </div>
