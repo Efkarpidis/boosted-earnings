@@ -36,13 +36,13 @@ export default function InvestPage() {
 
       {/* Hero Section with Background */}
       <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-black to-gold-dark/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-black to-gold-dark/10 animate-in fade-in duration-1000" />
         <div className="container mx-auto relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance animate-in fade-in slide-in-from-bottom-4 duration-700">
               Invest in the Future of <span className="text-gold glow-gold">Gig-Economy Technology</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 text-balance">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 text-balance animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
               Join us in revolutionizing how millions of gig workers track and optimize their earnings
             </p>
           </div>
@@ -52,64 +52,56 @@ export default function InvestPage() {
       {/* Features Grid */}
       <section className="py-20 px-4">
         <div className="container mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gold">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gold glow-gold">
             Why Invest in Boosted Earnings?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
-            <Card className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all hover:glow-gold">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gold/10 rounded-full flex items-center justify-center">
-                  <TrendingUp className="w-8 h-8 text-gold" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-gold">Growing Market</h3>
-                <p className="text-muted-foreground">
-                  The gig economy is projected to reach $455B by 2023, with millions of workers needing better tools.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all hover:glow-gold">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gold/10 rounded-full flex items-center justify-center">
-                  <Users className="w-8 h-8 text-gold" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-gold">Proven Demand</h3>
-                <p className="text-muted-foreground">
-                  Thousands of beta users already tracking over $10M in combined earnings on our platform.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all hover:glow-gold">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gold/10 rounded-full flex items-center justify-center">
-                  <Globe className="w-8 h-8 text-gold" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-gold">Scalable Platform</h3>
-                <p className="text-muted-foreground">
-                  Built on modern infrastructure ready to scale to millions of users across multiple markets.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all hover:glow-gold">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gold/10 rounded-full flex items-center justify-center">
-                  <Zap className="w-8 h-8 text-gold" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-gold">First-Mover Advantage</h3>
-                <p className="text-muted-foreground">
-                  Be part of the first comprehensive earnings platform designed specifically for gig workers.
-                </p>
-              </CardContent>
-            </Card>
+            {[
+              {
+                icon: TrendingUp,
+                title: "Growing Market",
+                description:
+                  "The gig economy is projected to reach $455B by 2023, with millions of workers needing better tools.",
+              },
+              {
+                icon: Users,
+                title: "Proven Demand",
+                description: "Thousands of beta users already tracking over $10M in combined earnings on our platform.",
+              },
+              {
+                icon: Globe,
+                title: "Scalable Platform",
+                description:
+                  "Built on modern infrastructure ready to scale to millions of users across multiple markets.",
+              },
+              {
+                icon: Zap,
+                title: "First-Mover Advantage",
+                description:
+                  "Be part of the first comprehensive earnings platform designed specifically for gig workers.",
+              },
+            ].map((feature, index) => (
+              <Card
+                key={index}
+                className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all hover:glow-gold hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gold/10 rounded-full flex items-center justify-center transition-all hover:bg-gold/20">
+                    <feature.icon className="w-8 h-8 text-gold" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gold">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {/* Investment Form */}
           <div className="max-w-3xl mx-auto">
-            <Card className="bg-card/50 backdrop-blur-sm border-gold/20">
+            <Card className="bg-card/50 backdrop-blur-sm border-2 border-gold/20 hover:border-gold/30 transition-all animate-in fade-in slide-in-from-bottom-4 duration-700">
               <CardContent className="p-8">
-                <h2 className="text-3xl font-bold mb-6 text-gold text-center">Express Your Interest</h2>
+                <h2 className="text-3xl font-bold mb-6 text-gold text-center glow-gold">Express Your Interest</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -119,7 +111,7 @@ export default function InvestPage() {
                         placeholder="John Doe"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="bg-background border-gold/30 focus:border-gold text-foreground"
+                        className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
                         required
                       />
                     </div>
@@ -130,7 +122,7 @@ export default function InvestPage() {
                         placeholder="john@example.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="bg-background border-gold/30 focus:border-gold text-foreground"
+                        className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
                         required
                       />
                     </div>
@@ -143,7 +135,7 @@ export default function InvestPage() {
                       placeholder="+1 (555) 123-4567"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="bg-background border-gold/30 focus:border-gold text-foreground"
+                      className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
                       required
                     />
                   </div>
@@ -154,7 +146,7 @@ export default function InvestPage() {
                       <div
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.investorType === "regular"
-                            ? "border-gold bg-gold/10"
+                            ? "border-gold bg-gold/10 glow-gold"
                             : "border-gold/30 hover:border-gold/50"
                         }`}
                         onClick={() => setFormData({ ...formData, investorType: "regular" })}
@@ -166,7 +158,7 @@ export default function InvestPage() {
                             value="regular"
                             checked={formData.investorType === "regular"}
                             onChange={(e) => setFormData({ ...formData, investorType: e.target.value })}
-                            className="mt-1"
+                            className="mt-1 accent-gold"
                           />
                           <div>
                             <h4 className="font-semibold text-gold">Regular Investor</h4>
@@ -179,7 +171,7 @@ export default function InvestPage() {
                       <div
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.investorType === "accredited"
-                            ? "border-gold bg-gold/10"
+                            ? "border-gold bg-gold/10 glow-gold"
                             : "border-gold/30 hover:border-gold/50"
                         }`}
                         onClick={() => setFormData({ ...formData, investorType: "accredited" })}
@@ -191,7 +183,7 @@ export default function InvestPage() {
                             value="accredited"
                             checked={formData.investorType === "accredited"}
                             onChange={(e) => setFormData({ ...formData, investorType: e.target.value })}
-                            className="mt-1"
+                            className="mt-1 accent-gold"
                           />
                           <div>
                             <h4 className="font-semibold text-gold">Accredited Investor</h4>
@@ -212,7 +204,7 @@ export default function InvestPage() {
                       value={formData.heardFrom}
                       onValueChange={(value) => setFormData({ ...formData, heardFrom: value })}
                     >
-                      <SelectTrigger className="bg-background border-gold/30 focus:border-gold text-foreground">
+                      <SelectTrigger className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all">
                         <SelectValue placeholder="Select an option" />
                       </SelectTrigger>
                       <SelectContent>
@@ -232,18 +224,18 @@ export default function InvestPage() {
                         placeholder="Tell us how you found us..."
                         value={formData.otherSource}
                         onChange={(e) => setFormData({ ...formData, otherSource: e.target.value })}
-                        className="bg-background border-gold/30 focus:border-gold text-foreground"
+                        className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
                         rows={3}
                       />
                     </div>
                   )}
 
-                  <div className="flex items-start gap-3 p-4 bg-gold/5 rounded-lg border border-gold/30">
+                  <div className="flex items-start gap-3 p-4 bg-gold/5 rounded-lg border-2 border-gold/30">
                     <Checkbox
                       id="disclaimer"
                       checked={formData.disclaimer}
                       onCheckedChange={(checked) => setFormData({ ...formData, disclaimer: checked as boolean })}
-                      className="mt-1 border-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold"
+                      className="mt-1 border-2 border-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold data-[state=checked]:text-black"
                     />
                     <label htmlFor="disclaimer" className="text-sm text-muted-foreground cursor-pointer">
                       I understand that this is an expression of interest and not a commitment to invest. I acknowledge
@@ -255,7 +247,7 @@ export default function InvestPage() {
                   <Button
                     type="submit"
                     disabled={!formData.disclaimer}
-                    className="w-full bg-gold hover:bg-gold-dark text-black font-semibold text-lg py-6 glow-gold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gold hover:bg-gold-dark text-black font-semibold text-lg py-6 glow-gold disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-[1.02]"
                   >
                     Submit Interest
                   </Button>
