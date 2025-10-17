@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseError } from "firebase/app"
 import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, limit } from "firebase/firestore"
-import { getAuth } from "firebase/auth"
+import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth"
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -47,7 +47,7 @@ try {
   }
 }
 
-export { collection, addDoc }
+export { collection, addDoc, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink }
 
 export async function checkExistingEmail(email: string): Promise<{ exists: boolean; message?: string }> {
   try {
