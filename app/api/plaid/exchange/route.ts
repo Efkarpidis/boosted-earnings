@@ -1,51 +1,51 @@
 import { NextResponse } from "next/server"
+import { plaidClient, isPlaidConfigured } from "@/lib/plaid"
+import { savePlaidAccount } from "@/lib/mongodb-schemas"
 
 export async function POST(request: Request) {
   try {
-    const { publicToken, userId } = await request.json()
+    const { publicToken, userId, platform } = await request.json()
 
-    const plaidClientId = process.env.PLAID_CLIENT_ID
-    const plaidSecret = process.env.PLAID_SECRET
-    const plaidEnv = process.env.PLAID_ENV || "sandbox"
-
-    if (!plaidClientId || !plaidSecret) {
+    if (!isPlaidConfigured()) {
       console.warn("Plaid credentials not configured, using mock data")
       return NextResponse.json({
         accessToken: `mock-access-sandbox-${Date.now()}`,
         itemId: `mock-item-${Date.now()}`,
-        success: true,
+        accountId: `mock-account-${Date.now()}`,
+        mock: true,
       })
     }
 
-    // Exchange public token for access token
-    const response = await fetch(`https://${plaidEnv}.plaid.com/item/public_token/exchange`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_id: plaidClientId,
-        secret: plaidSecret,
-        public_token: publicToken,
-      }),
+    const response = await plaidClient.itemPublicTokenExchange({
+      public_token: publicToken,
     })
 
-    if (!response.ok) {
-      throw new Error(`Plaid API error: ${response.statusText}`)
-    }
+    const accessToken = response.data.access_token
+    const itemId = response.data.item_id
 
-    const data = await response.json()
+    const accountsResponse = await plaidClient.accountsGet({
+      access_token: accessToken,
+    })
 
-    // In production, store the access_token securely in your database
-    // associated with the userId
+    const accountId = accountsResponse.data.accounts[0]?.account_id || ""
+
+    await savePlaidAccount({
+      userId,
+      platform,
+      accessToken,
+      itemId,
+      accountId,
+      connectedAt: new Date(),
+    })
 
     return NextResponse.json({
-      accessToken: data.access_token,
-      itemId: data.item_id,
+      accessToken,
+      itemId,
+      accountId,
       success: true,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error exchanging Plaid token:", error)
-    return NextResponse.json({ error: "Failed to exchange token" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to exchange token", details: error.message }, { status: 500 })
   }
 }
