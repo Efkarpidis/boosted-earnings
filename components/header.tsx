@@ -29,60 +29,85 @@ export function Header() {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <Image src="/dark-logo.png" alt="Boosted Earnings" width={150} height={40} className="h-10 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-foreground hover:text-gold transition-colors">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-4 flex-1 justify-center">
+            <Link
+              href="/"
+              className="text-foreground hover:text-gold transition-colors text-sm xl:text-base whitespace-nowrap"
+            >
               Home
             </Link>
-            <Link href="/features" className="text-foreground hover:text-gold transition-colors">
+            <Link
+              href="/features"
+              className="text-foreground hover:text-gold transition-colors text-sm xl:text-base whitespace-nowrap"
+            >
               Features
             </Link>
-            <Link href="/pricing" className="text-foreground hover:text-gold transition-colors">
+            <Link
+              href="/pricing"
+              className="text-foreground hover:text-gold transition-colors text-sm xl:text-base whitespace-nowrap"
+            >
               Pricing
             </Link>
-            <Link href="/blog" className="text-foreground hover:text-gold transition-colors">
+            <Link
+              href="/blog"
+              className="text-foreground hover:text-gold transition-colors text-sm xl:text-base whitespace-nowrap"
+            >
               Blog
             </Link>
-            <Link href="/founders" className="text-foreground hover:text-gold transition-colors">
+            <Link
+              href="/founders"
+              className="text-foreground hover:text-gold transition-colors text-sm xl:text-base whitespace-nowrap"
+            >
               Founders
             </Link>
-            <Link href="/invest" className="text-foreground hover:text-gold transition-colors">
+            <Link
+              href="/invest"
+              className="text-foreground hover:text-gold transition-colors text-sm xl:text-base whitespace-nowrap"
+            >
               Invest
             </Link>
-            <Link href="/faq" className="text-foreground hover:text-gold transition-colors">
+            <Link
+              href="/faq"
+              className="text-foreground hover:text-gold transition-colors text-sm xl:text-base whitespace-nowrap"
+            >
               FAQ
             </Link>
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-4 flex-shrink-0">
             {user ? (
               <>
                 <Link href="/dashboard">
-                  <Button className="bg-gold hover:bg-gold-dark text-black font-semibold glow-gold">Dashboard</Button>
+                  <Button className="bg-gold hover:bg-gold-dark text-black font-semibold glow-gold text-sm xl:text-base px-3 xl:px-4">
+                    Dashboard
+                  </Button>
                 </Link>
                 <Button
                   onClick={handleSignOut}
                   variant="outline"
-                  className="border-gold text-gold hover:bg-gold hover:text-black bg-transparent"
+                  className="border-gold text-gold hover:bg-gold hover:text-black bg-transparent text-sm xl:text-base px-3 xl:px-4"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-4 h-4 mr-1 xl:mr-2" />
                   Sign Out
                 </Button>
               </>
             ) : (
               <>
                 <Link href="/beta-signup">
-                  <Button className="bg-gold hover:bg-gold-dark text-black font-semibold glow-gold">Join Beta</Button>
+                  <Button className="bg-gold hover:bg-gold-dark text-black font-semibold glow-gold text-sm xl:text-base px-3 xl:px-4">
+                    Join Beta
+                  </Button>
                 </Link>
                 <Link href="/login">
                   <Button
                     variant="outline"
-                    className="border-gold text-gold hover:bg-gold hover:text-black bg-transparent"
+                    className="border-gold text-gold hover:bg-gold hover:text-black bg-transparent text-sm xl:text-base px-3 xl:px-4"
                   >
                     Sign In
                   </Button>
@@ -92,7 +117,7 @@ export function Header() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden text-gold" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <button className="lg:hidden text-gold" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>

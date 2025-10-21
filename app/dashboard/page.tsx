@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
+import { usePlaidLink } from "react-plaid-link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,43 +24,164 @@ function DashboardContent() {
   const [earningsData, setEarningsData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
-  const [accountId, setAccountId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [usingMockData, setUsingMockData] = useState(false)
 
-  useEffect(() => {
-    if (accountId) {
-      fetchEarningsData()
-    }
-  }, [accountId, timeRange])
+  const [linkToken, setLinkToken] = useState<string | null>(null)
+  const [platformToConnect, setPlatformToConnect] = useState<string | null>(null)
+  const [platformAccessTokens, setPlatformAccessTokens] = useState<Record<string, string>>({})
 
-  const fetchEarningsData = async () => {
-    setLoading(true)
-    setError(null)
+  const onSuccess = useCallback(
+    async (publicToken: string, metadata: any) => {
+      if (!platformToConnect) return
+
+      setConnectingPlatform(platformToConnect)
+      try {
+        // Exchange public token for access token
+        const exchangeResponse = await fetch("/api/plaid/exchange", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            publicToken,
+            userId: user?.uid,
+            platform: platformToConnect,
+          }),
+        })
+
+        const exchangeData = await exchangeResponse.json()
+
+        if (!exchangeResponse.ok) {
+          throw new Error(exchangeData.error || "Failed to exchange token")
+        }
+
+        const { accessToken, accountId, mock } = exchangeData
+
+        // Store access token for this platform
+        setPlatformAccessTokens((prev) => ({
+          ...prev,
+          [platformToConnect]: accessToken,
+        }))
+
+        if (mock) {
+          setUsingMockData(true)
+        }
+
+        // Fetch all Plaid data products in parallel
+        await Promise.all([
+          fetchBalance(accessToken, platformToConnect),
+          fetchIdentity(accessToken, platformToConnect),
+          fetchAssets(accessToken, platformToConnect),
+          fetchConsumerReport(accessToken, platformToConnect),
+        ])
+
+        // Mark platform as connected
+        setConnectedPlatforms((prev) => [...prev, platformToConnect])
+
+        toast({
+          title: "Success!",
+          description: `${platformToConnect} connected successfully via Plaid${mock ? " (mock data)" : ""}.`,
+        })
+      } catch (error: any) {
+        console.error("Error connecting platform:", error)
+        toast({
+          title: "Connection Failed",
+          description: error.message || "Failed to connect platform. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setConnectingPlatform(null)
+        setPlatformToConnect(null)
+      }
+    },
+    [platformToConnect, user, toast],
+  )
+
+  const { open, ready } = usePlaidLink({
+    token: linkToken,
+    onSuccess,
+  })
+
+  const fetchBalance = async (accessToken: string, platform: string) => {
     try {
-      const response = await fetch(`/api/argyle/earnings?accountId=${accountId}&timeRange=${timeRange}`)
+      const response = await fetch(
+        `/api/plaid/balance?accessToken=${accessToken}&userId=${user?.uid}&platform=${platform}`,
+      )
       const data = await response.json()
 
       if (data.mock) {
         setUsingMockData(true)
-        toast({
-          title: "Using Mock Data",
-          description: "API credentials not configured. Displaying sample data.",
-          variant: "default",
-        })
       }
 
-      setEarningsData(data)
+      console.log(`[v0] Balance data for ${platform}:`, data)
+      return data
     } catch (error) {
-      console.error("Error fetching earnings:", error)
-      setError("Failed to fetch earnings data. Please try again.")
-      toast({
-        title: "Error",
-        description: "Failed to fetch earnings data. Please try again.",
-        variant: "destructive",
+      console.error("Error fetching balance:", error)
+    }
+  }
+
+  const fetchIdentity = async (accessToken: string, platform: string) => {
+    try {
+      const response = await fetch(
+        `/api/plaid/identity?accessToken=${accessToken}&userId=${user?.uid}&platform=${platform}`,
+      )
+      const data = await response.json()
+
+      if (data.mock) {
+        setUsingMockData(true)
+      }
+
+      console.log(`[v0] Identity data for ${platform}:`, data)
+      return data
+    } catch (error) {
+      console.error("Error fetching identity:", error)
+    }
+  }
+
+  const fetchAssets = async (accessToken: string, platform: string) => {
+    try {
+      const response = await fetch("/api/plaid/assets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessToken,
+          userId: user?.uid,
+          platform,
+        }),
       })
-    } finally {
-      setLoading(false)
+      const data = await response.json()
+
+      if (data.mock) {
+        setUsingMockData(true)
+      }
+
+      console.log(`[v0] Assets data for ${platform}:`, data)
+      return data
+    } catch (error) {
+      console.error("Error fetching assets:", error)
+    }
+  }
+
+  const fetchConsumerReport = async (accessToken: string, platform: string) => {
+    try {
+      const response = await fetch("/api/plaid/consumer-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessToken,
+          userId: user?.uid,
+          platform,
+        }),
+      })
+      const data = await response.json()
+
+      if (data.mock) {
+        setUsingMockData(true)
+      }
+
+      console.log(`[v0] Consumer report data for ${platform}:`, data)
+      return data
+    } catch (error) {
+      console.error("Error fetching consumer report:", error)
     }
   }
 
@@ -72,61 +194,44 @@ function DashboardContent() {
       return
     }
 
-    setConnectingPlatform(platform)
+    setPlatformToConnect(platform)
     setError(null)
 
     try {
-      // Step 1: Initialize Argyle connection for earnings data
-      const argyleResponse = await fetch("/api/argyle/connect", {
+      // Get Plaid Link token
+      const response = await fetch("/api/plaid/link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform, userId: user?.uid }),
+        body: JSON.stringify({ userId: user?.uid, platform }),
       })
 
-      const argyleData = await argyleResponse.json()
+      const data = await response.json()
 
-      if (!argyleResponse.ok) {
-        throw new Error(argyleData.error || "Failed to connect to Argyle")
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create link token")
       }
 
-      if (argyleData.mock) {
+      if (data.mock) {
         setUsingMockData(true)
         toast({
           title: "Mock Connection",
-          description: `${platform} connected with sample data. Configure API keys for real data.`,
+          description: `${platform} connected with sample data. Configure PLAID_CLIENT_ID and PLAID_SECRET for real data.`,
         })
-      } else {
-        toast({
-          title: "Success!",
-          description: `${platform} connected successfully via Argyle.`,
-        })
+        setConnectedPlatforms((prev) => [...prev, platform])
+        setPlatformToConnect(null)
+        return
       }
 
-      // Step 2: Initialize Plaid Link for bank data (optional)
-      try {
-        const plaidResponse = await fetch("/api/plaid/link", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: user?.uid }),
-        })
+      setLinkToken(data.link_token)
 
-        const plaidData = await plaidResponse.json()
-
-        if (plaidData.link_token && !plaidData.mock) {
-          // In production, you would open Plaid Link UI here with the link_token
-          console.log("Plaid Link Token:", plaidData.link_token)
+      // Open Plaid Link when ready
+      setTimeout(() => {
+        if (ready) {
+          open()
         }
-      } catch (plaidError) {
-        console.log("Plaid connection optional, continuing with Argyle only")
-      }
-
-      // Update state with successful connection
-      setConnectedPlatforms([...connectedPlatforms, platform])
-      if (argyleData.accountId) {
-        setAccountId(argyleData.accountId)
-      }
+      }, 100)
     } catch (error: any) {
-      console.error("Error connecting platform:", error)
+      console.error("Error initiating platform connection:", error)
       const errorMessage = error.message || "Failed to connect platform. Please try again."
       setError(errorMessage)
 
@@ -135,10 +240,15 @@ function DashboardContent() {
         description: errorMessage,
         variant: "destructive",
       })
-    } finally {
-      setConnectingPlatform(null)
+      setPlatformToConnect(null)
     }
   }
+
+  useEffect(() => {
+    if (linkToken && ready && platformToConnect) {
+      open()
+    }
+  }, [linkToken, ready, open, platformToConnect])
 
   const stats = earningsData || {
     totalEarnings: 2847.5,
@@ -189,8 +299,8 @@ function DashboardContent() {
             <Alert className="mb-6 border-gold/30 bg-gold/5">
               <AlertCircle className="h-4 w-4 text-gold" />
               <AlertDescription className="text-foreground">
-                You're viewing sample data. Connect your platforms and configure API keys (ARGYLE_API_KEY,
-                PLAID_CLIENT_ID) to see real earnings.
+                You're viewing sample data. Connect your platforms and configure API keys (PLAID_CLIENT_ID,
+                PLAID_SECRET) in your environment variables to see real earnings data.
               </AlertDescription>
             </Alert>
           )}
@@ -205,7 +315,7 @@ function DashboardContent() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Connect your rideshare and delivery platforms to automatically track your earnings
+                Connect your rideshare and delivery platforms to automatically track your earnings via Plaid
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {["Uber", "Lyft", "DoorDash", "Uber Eats"].map((platform) => (
