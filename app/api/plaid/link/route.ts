@@ -15,21 +15,15 @@ export async function POST(request: Request) {
       })
     }
 
-    // Create Plaid link token for sandbox environment
     const response = await plaidClient.linkTokenCreate({
       user: {
         client_user_id: userId,
       },
       client_name: "Boosted Earnings",
-      products: [Products.Auth, Products.Transactions, Products.Identity, Products.Assets],
+      products: [Products.Auth, Products.Transactions],
       country_codes: [CountryCode.Us],
       language: "en",
       webhook: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/plaid/webhook`,
-      account_filters: {
-        depository: {
-          account_subtypes: ["checking", "savings"],
-        },
-      },
     })
 
     return NextResponse.json({
