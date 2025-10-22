@@ -152,6 +152,51 @@ export interface TransactionOverride {
   createdAt: Date
 }
 
+// Argyle-specific schemas for rideshare data
+export interface ArgyleItem {
+  userId: string
+  itemId: string
+  accessToken: string
+  platform: "Uber" | "Lyft" | "DoorDash" | "UberEats"
+  createdAt: Date
+}
+
+export interface DriverTrip {
+  userId: string
+  platform: "Uber" | "Lyft" | "DoorDash" | "UberEats"
+  tripId: string
+  startTime: Date
+  endTime: Date
+  distanceMiles: number
+  durationMin: number
+  status: string
+  earningsTip: number
+  earningsBase: number
+  city?: string
+  createdAt: Date
+}
+
+export interface DriverEarning {
+  userId: string
+  platform: "Uber" | "Lyft" | "DoorDash" | "UberEats"
+  earningId: string
+  totalAmount: number
+  tips: number
+  bonuses: number
+  startDate: string
+  endDate: string
+  payoutStatus: string
+  updatedAt: Date
+}
+
+export interface DriverBalance {
+  userId: string
+  platform: "Uber" | "Lyft" | "DoorDash" | "UberEats"
+  balanceAmount: number
+  lastSyncedAt: Date
+}
+
+// Collection getters
 export async function getPlaidAccountsCollection() {
   const client = await clientPromise
   return client.db("boosted_earnings").collection<PlaidAccount>("plaid_accounts")
@@ -177,7 +222,6 @@ export async function getConsumerReportsCollection() {
   return client.db("boosted_earnings").collection<ConsumerReport>("consumer_reports")
 }
 
-// Collection getters
 export async function getPlaidItemsCollection() {
   const client = await clientPromise
   return client.db("boosted_earnings").collection<PlaidItem>("plaid_items")
@@ -195,7 +239,7 @@ export async function getTransactionsCollection() {
 
 export async function getBalanceHistoryCollection() {
   const client = await clientPromise
-  return client.db("boosted_earnings").collection<BalanceHistory>("balances_history")
+  return client.db("boosted_earnings").collection<BalanceHistory>("balance_history")
 }
 
 export async function getManualAssetsCollection() {
@@ -210,7 +254,28 @@ export async function getLiabilitiesCollection() {
 
 export async function getTransactionOverridesCollection() {
   const client = await clientPromise
-  return client.db("boosted_earnings").collection<TransactionOverride>("tx_overrides")
+  return client.db("boosted_earnings").collection<TransactionOverride>("transaction_overrides")
+}
+
+// Collection getters for Argyle data
+export async function getArgyleItemsCollection() {
+  const client = await clientPromise
+  return client.db("boosted_earnings").collection<ArgyleItem>("argyle_items")
+}
+
+export async function getDriverTripsCollection() {
+  const client = await clientPromise
+  return client.db("boosted_earnings").collection<DriverTrip>("driver_trips")
+}
+
+export async function getDriverEarningsCollection() {
+  const client = await clientPromise
+  return client.db("boosted_earnings").collection<DriverEarning>("driver_earnings")
+}
+
+export async function getDriverBalancesCollection() {
+  const client = await clientPromise
+  return client.db("boosted_earnings").collection<DriverBalance>("driver_balances")
 }
 
 // Helper functions to save data
@@ -298,6 +363,31 @@ export async function saveTransactionOverride(override: TransactionOverride) {
   await collection.updateOne(
     { userId: override.userId, transactionId: override.transactionId },
     { $set: override },
+    { upsert: true },
+  )
+}
+
+// Helper functions for Argyle data
+export async function saveArgyleItem(item: ArgyleItem) {
+  const collection = await getArgyleItemsCollection()
+  await collection.updateOne({ userId: item.userId, itemId: item.itemId }, { $set: item }, { upsert: true })
+}
+
+export async function saveDriverTrip(trip: DriverTrip) {
+  const collection = await getDriverTripsCollection()
+  await collection.updateOne({ tripId: trip.tripId }, { $set: trip }, { upsert: true })
+}
+
+export async function saveDriverEarning(earning: DriverEarning) {
+  const collection = await getDriverEarningsCollection()
+  await collection.updateOne({ earningId: earning.earningId }, { $set: earning }, { upsert: true })
+}
+
+export async function saveDriverBalance(balance: DriverBalance) {
+  const collection = await getDriverBalancesCollection()
+  await collection.updateOne(
+    { userId: balance.userId, platform: balance.platform },
+    { $set: balance },
     { upsert: true },
   )
 }

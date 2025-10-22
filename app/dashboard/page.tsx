@@ -15,6 +15,9 @@ import { useAuth } from "@/components/auth/auth-provider"
 import { useToast } from "@/hooks/use-toast"
 import { TrendingUp, DollarSign, Clock, TrendingDown, LinkIcon, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { DriverPerformanceCard } from "./components/driver-performance-card"
+import { EarningsTrendChart } from "./components/earnings-trend-chart"
+import { PlatformBreakdownChart as ArgylePlatformBreakdown } from "./components/platform-breakdown-chart"
 
 function DashboardContent() {
   const { user } = useAuth()
@@ -28,6 +31,7 @@ function DashboardContent() {
   const [usingMockData, setUsingMockData] = useState(false)
   const [linkToken, setLinkToken] = useState<string | null>(null)
   const [currentPlatform, setCurrentPlatform] = useState<string | null>(null)
+  const [syncing, setSyncing] = useState(false)
 
   const onSuccess = useCallback(
     async (publicToken: string, metadata: any) => {
@@ -190,6 +194,67 @@ function DashboardContent() {
     }
   }
 
+  const handleSyncTrips = async () => {
+    setSyncing(true)
+    try {
+      const response = await fetch("/api/argyle/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.uid || "test-user" }),
+      })
+
+      const data = await response.json()
+
+      if (data.mock) {
+        toast({
+          title: "Sandbox Mode",
+          description: `Synced ${data.newTrips} trips and ${data.newEarnings} earnings (mock data). Configure ARGYLE_CLIENT_ID and ARGYLE_SECRET for real data.`,
+        })
+      } else {
+        toast({
+          title: "Sync Complete",
+          description: `Synced ${data.newTrips} trips and ${data.newEarnings} earnings from Argyle.`,
+        })
+      }
+    } catch (error: any) {
+      console.error("Error syncing trips:", error)
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync trips from Argyle.",
+        variant: "destructive",
+      })
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  const handleRefreshBalances = async () => {
+    setSyncing(true)
+    try {
+      const response = await fetch("/api/plaid/balances", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.uid || "test-user" }),
+      })
+
+      const data = await response.json()
+
+      toast({
+        title: "Balances Refreshed",
+        description: `Updated balances for ${data.accountsUpdated || 0} accounts.`,
+      })
+    } catch (error: any) {
+      console.error("Error refreshing balances:", error)
+      toast({
+        title: "Refresh Failed",
+        description: error.message || "Failed to refresh balances from Plaid.",
+        variant: "destructive",
+      })
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   useEffect(() => {
     if (linkToken && ready) {
       open()
@@ -292,6 +357,25 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
+          {/* Sync Action Buttons */}
+          <div className="flex gap-4 mb-8">
+            <Button
+              onClick={handleSyncTrips}
+              disabled={syncing}
+              className="bg-gold hover:bg-gold-dark text-black font-semibold"
+            >
+              {syncing ? "Syncing..." : "Sync Trips (Argyle)"}
+            </Button>
+            <Button
+              onClick={handleRefreshBalances}
+              disabled={syncing}
+              variant="outline"
+              className="border-gold text-gold hover:bg-gold hover:text-black bg-transparent"
+            >
+              {syncing ? "Refreshing..." : "Refresh Balances (Plaid)"}
+            </Button>
+          </div>
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all">
@@ -359,6 +443,18 @@ function DashboardContent() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <EarningsChart timeRange={timeRange} data={earningsData?.dailyData} />
             <PlatformBreakdown data={earningsData?.breakdown} />
+          </div>
+
+          {/* Argyle Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <DriverPerformanceCard userId={user?.uid} />
+            <div className="lg:col-span-2">
+              <EarningsTrendChart userId={user?.uid} />
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <ArgylePlatformBreakdown userId={user?.uid} />
           </div>
 
           {/* Weekly Comparison */}
