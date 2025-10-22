@@ -1,235 +1,144 @@
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
 import {
-  DollarSign,
-  MapPin,
-  BarChart3,
-  Calendar,
   TrendingUp,
+  BarChart3,
   Shield,
+  DollarSign,
+  Zap,
+  Users,
   Bell,
   FileText,
-  Zap,
+  Calendar,
   Target,
-  Clock,
+  Map,
   Smartphone,
 } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
 
 export default function FeaturesPage() {
   const features = [
     {
-      icon: DollarSign,
-      title: "Real-Time Income Tracking",
+      icon: TrendingUp,
+      title: "Real-Time Earnings Tracking",
       description:
-        "Automatically sync earnings from Uber, Lyft, DoorDash, and more. See your income, tips, and bonuses updated in real-time across all platforms.",
-      benefits: ["Multi-platform integration", "Instant sync", "Tip tracking", "Bonus alerts"],
-    },
-    {
-      icon: MapPin,
-      title: "Smart Route Optimization",
-      description:
-        "AI-powered recommendations for the best times and locations to drive based on historical data, demand patterns, and surge pricing.",
-      benefits: ["Heat map visualization", "Demand forecasting", "Surge predictions", "Zone recommendations"],
+        "Monitor your earnings across all platforms in real-time. See exactly how much you're making as you work.",
     },
     {
       icon: BarChart3,
-      title: "Advanced Analytics Dashboard",
+      title: "Advanced Analytics",
       description:
-        "Visualize your performance with detailed charts and insights. Track hourly rates, peak hours, top-earning zones, and more.",
-      benefits: ["Interactive charts", "Custom date ranges", "Performance metrics", "Trend analysis"],
+        "Get detailed insights into your earnings patterns, peak hours, and performance metrics with beautiful visualizations.",
     },
     {
-      icon: Calendar,
-      title: "Automatic Mileage Logging",
-      description:
-        "GPS-based mileage tracking for accurate tax deductions. Generate IRS-compliant reports with one click.",
-      benefits: ["GPS tracking", "IRS compliance", "Expense categorization", "Tax reports"],
-    },
-    {
-      icon: TrendingUp,
-      title: "Earnings Forecasts",
-      description:
-        "Predict your weekly and monthly earnings based on your driving patterns, market trends, and seasonal data.",
-      benefits: ["Weekly projections", "Monthly forecasts", "Goal tracking", "Income planning"],
-    },
-    {
-      icon: Shield,
-      title: "Bank-Level Security",
-      description: "Your data is protected with 256-bit encryption. We never sell your information to third parties.",
-      benefits: ["End-to-end encryption", "Secure data storage", "Privacy first", "GDPR compliant"],
-    },
-    {
-      icon: Bell,
-      title: "Smart Notifications",
-      description:
-        "Get alerts for surge pricing, bonus opportunities, and optimal driving times based on your preferences.",
-      benefits: ["Surge alerts", "Bonus notifications", "Custom alerts", "Smart timing"],
-    },
-    {
-      icon: FileText,
-      title: "Tax Preparation Tools",
-      description:
-        "Simplify tax season with organized expense tracking, deduction calculations, and exportable reports.",
-      benefits: ["Expense tracking", "Deduction calculator", "Quarterly estimates", "Export to TurboTax"],
-    },
-    {
-      icon: Zap,
+      icon: DollarSign,
       title: "Multi-Platform Support",
-      description:
-        "Connect all your gig economy accounts in one place. Works with Uber, Lyft, DoorDash, Uber Eats, Grubhub, and more.",
-      benefits: ["10+ integrations", "One dashboard", "Unified reporting", "Cross-platform insights"],
+      description: "Connect Uber, Lyft, DoorDash, Uber Eats, and more. All your earnings in one unified dashboard.",
     },
     {
       icon: Target,
       title: "Goal Setting & Tracking",
       description:
-        "Set daily, weekly, or monthly income goals and track your progress with visual indicators and motivational insights.",
-      benefits: ["Custom goals", "Progress tracking", "Achievement badges", "Motivation tools"],
+        "Set daily, weekly, or monthly earning goals and track your progress with visual indicators and notifications.",
     },
     {
-      icon: Clock,
+      icon: Bell,
+      title: "Smart Notifications",
+      description:
+        "Get alerts for peak hours, surge pricing, and earning opportunities in your area. Never miss a high-earning moment.",
+    },
+    {
+      icon: Map,
+      title: "Heat Maps & Zones",
+      description: "Visualize high-demand areas and optimize your routes to maximize earnings and reduce dead miles.",
+    },
+    {
+      icon: FileText,
+      title: "Tax Preparation Tools",
+      description:
+        "Automatically track deductible expenses, mileage, and generate tax reports. Make tax season stress-free.",
+    },
+    {
+      icon: Calendar,
       title: "Schedule Optimization",
       description:
-        "Analyze your best performing hours and days. Get recommendations for when to drive to maximize your earnings.",
-      benefits: ["Time analysis", "Schedule suggestions", "Peak hour insights", "Work-life balance"],
+        "AI-powered recommendations on when and where to drive based on historical data and market conditions.",
+    },
+    {
+      icon: Shield,
+      title: "Bank-Level Security",
+      description: "Your data is encrypted with 256-bit SSL. We never share your information with third parties.",
+    },
+    {
+      icon: Users,
+      title: "Driver Community",
+      description: "Connect with thousands of drivers, share tips, and learn from the best in the community.",
     },
     {
       icon: Smartphone,
-      title: "Mobile-First Design",
-      description: "Access all features on the go with our intuitive mobile app. Available for iOS and Android.",
-      benefits: ["Native apps", "Offline mode", "Quick actions", "Widget support"],
+      title: "Mobile & Desktop Apps",
+      description:
+        "Access your dashboard anywhere with native iOS, Android, and web applications. Sync across all devices.",
+    },
+    {
+      icon: Zap,
+      title: "Instant Sync",
+      description: "Automatic data synchronization across all your connected platforms. No manual entry required.",
     },
   ]
 
   return (
-    <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="border-b border-border py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="mb-4 text-balance text-4xl font-bold md:text-5xl">
-              Everything You Need to <span className="text-primary">Maximize Earnings</span>
-            </h1>
-            <p className="mb-8 text-pretty text-lg text-muted-foreground">
-              Powerful tools designed specifically for gig economy drivers. Track income, optimize routes, and boost
-              your earnings.
-            </p>
-            <Button asChild size="lg">
-              <Link href="/beta-signup">Start Free Trial</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-black">
+      <Header />
 
-      {/* Features Grid */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <section className="pt-32 pb-20 px-4">
+        <div className="container mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gold">Powerful Features</h1>
+            <p className="text-xl text-muted-foreground text-balance">
+              Everything you need to track, analyze, and optimize your rideshare earnings
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature) => {
               const Icon = feature.icon
               return (
-                <Card key={feature.title} className="border-border bg-card">
-                  <CardContent className="pt-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                      <Icon className="h-6 w-6 text-primary" />
+                <Card
+                  key={feature.title}
+                  className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all hover:glow-gold group"
+                >
+                  <CardContent className="p-8">
+                    <div className="w-16 h-16 mb-4 bg-gold/10 rounded-full flex items-center justify-center group-hover:bg-gold/20 transition-colors">
+                      <Icon className="w-8 h-8 text-gold" />
                     </div>
-                    <h3 className="mb-2 text-xl font-semibold">{feature.title}</h3>
-                    <p className="mb-4 text-sm text-muted-foreground">{feature.description}</p>
-                    <ul className="space-y-1">
-                      {feature.benefits.map((benefit) => (
-                        <li key={benefit} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
+                    <h3 className="text-xl font-semibold mb-3 text-gold">{feature.title}</h3>
+                    <p className="text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
               )
             })}
           </div>
-        </div>
-      </section>
 
-      {/* Comparison Section */}
-      <section className="border-y border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="mb-12 text-center text-3xl font-bold">How We Compare</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="pb-4 text-left">Feature</th>
-                    <th className="pb-4 text-center">Boosted Earnings</th>
-                    <th className="pb-4 text-center text-muted-foreground">Solo</th>
-                    <th className="pb-4 text-center text-muted-foreground">Gridwise</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  <tr className="border-b border-border">
-                    <td className="py-4">Multi-platform tracking</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                  </tr>
-                  <tr className="border-b border-border">
-                    <td className="py-4">AI route optimization</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                    <td className="py-4 text-center text-muted-foreground">✗</td>
-                    <td className="py-4 text-center text-muted-foreground">Limited</td>
-                  </tr>
-                  <tr className="border-b border-border">
-                    <td className="py-4">Earnings forecasts</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                    <td className="py-4 text-center text-muted-foreground">✗</td>
-                    <td className="py-4 text-center text-muted-foreground">✗</td>
-                  </tr>
-                  <tr className="border-b border-border">
-                    <td className="py-4">Tax preparation tools</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                    <td className="py-4 text-center text-muted-foreground">Basic</td>
-                  </tr>
-                  <tr className="border-b border-border">
-                    <td className="py-4">Real-time surge alerts</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                    <td className="py-4 text-center text-muted-foreground">✗</td>
-                    <td className="py-4 text-center text-primary">✓</td>
-                  </tr>
-                  <tr>
-                    <td className="py-4">Price</td>
-                    <td className="py-4 text-center font-semibold text-primary">$9.99/mo</td>
-                    <td className="py-4 text-center text-muted-foreground">$14.99/mo</td>
-                    <td className="py-4 text-center text-muted-foreground">Free + Premium</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div className="mt-16 text-center">
+            <p className="text-xl text-muted-foreground mb-8">Ready to experience all these features and more?</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="/beta-signup">
+                <button className="bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-4 rounded-lg glow-gold transition-all">
+                  Join Beta Program
+                </button>
+              </a>
+              <a href="/pricing">
+                <button className="border-2 border-gold text-gold hover:bg-gold hover:text-black font-semibold px-8 py-4 rounded-lg transition-all">
+                  View Pricing
+                </button>
+              </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-3xl font-bold">Ready to Get Started?</h2>
-            <p className="mb-8 text-muted-foreground">
-              Join thousands of drivers who are already maximizing their earnings with Boosted Earnings.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button asChild size="lg">
-                <Link href="/beta-signup">Start Free Trial</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/pricing">View Pricing</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }

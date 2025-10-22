@@ -1,203 +1,253 @@
-import Link from "next/link"
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
-import { TrendingUp, MapPin, Calendar, DollarSign, BarChart3, Shield } from "lucide-react"
+import { countries, statesByCountry, citiesByState } from "@/lib/location-data"
+import { TrendingUp, DollarSign, BarChart3, Shield, Zap, Users } from "lucide-react"
+import Image from "next/image"
 
 export default function HomePage() {
+  const [email, setEmail] = useState("")
+  const [country, setCountry] = useState("")
+  const [state, setState] = useState("")
+  const [city, setCity] = useState("")
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("Form submitted:", { email, country, state, city })
+    // Handle form submission
+  }
+
   return (
-    <div className="flex flex-col">
+    <div className="min-h-screen bg-black">
+      <Header />
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-border">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
-        <div className="container relative mx-auto px-4 py-24 md:py-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-foreground md:text-6xl">
-              Maximize Your <span className="text-primary">Gig Driver</span> Earnings
-            </h1>
-            <p className="mb-8 text-pretty text-lg text-muted-foreground md:text-xl">
-              Track your income, optimize your routes, and boost your earnings with intelligent insights designed for
-              Uber, Lyft, and DoorDash drivers.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button asChild size="lg" className="text-base">
-                <Link href="/beta-signup">Join the Beta</Link>
+      <section className="pt-32 pb-20 px-4">
+        <div className="container mx-auto text-center">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance animate-in fade-in slide-in-from-bottom-4 duration-700">
+            Elevate Your <span className="text-gold glow-gold">Rideshare Experience</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-12 text-balance animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+            Designed by a driver, for the driver.
+          </p>
+
+          {/* Email Form */}
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
+          >
+            <Card className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/40 transition-all">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
+                    required
+                  />
+                  <Select value={country} onValueChange={setCountry}>
+                    <SelectTrigger className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all">
+                      <SelectValue placeholder="Select Country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <Select value={state} onValueChange={setState} disabled={!country}>
+                    <SelectTrigger className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all">
+                      <SelectValue placeholder="Select State/Province" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {country &&
+                        statesByCountry[country]?.map((s) => (
+                          <SelectItem key={s.value} value={s.value}>
+                            {s.label}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={city} onValueChange={setCity} disabled={!state}>
+                    <SelectTrigger className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all">
+                      <SelectValue placeholder="Select City" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {state &&
+                        citiesByState[state]?.map((c) => (
+                          <SelectItem key={c.value} value={c.value}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-gold hover:bg-gold-dark text-black font-semibold glow-gold transition-all hover:scale-[1.02]"
+                >
+                  Get Early Access
+                </Button>
+              </CardContent>
+            </Card>
+          </form>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-20 px-4 bg-gradient-to-b from-black to-card">
+        <div className="container mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gold glow-gold">
+            Why Boosted Earnings?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: TrendingUp,
+                title: "Real-Time Tracking",
+                description: "Monitor your earnings across all platforms in real-time with intelligent analytics.",
+              },
+              {
+                icon: BarChart3,
+                title: "Smart Insights",
+                description: "Get actionable insights to maximize your earnings and optimize your driving strategy.",
+              },
+              {
+                icon: Shield,
+                title: "Secure & Private",
+                description: "Your data is encrypted and secure. We never share your information with third parties.",
+              },
+              {
+                icon: DollarSign,
+                title: "Multi-Platform Support",
+                description: "Connect Uber, Lyft, DoorDash, and more. All your earnings in one place.",
+              },
+              {
+                icon: Zap,
+                title: "Instant Notifications",
+                description: "Get alerts for peak hours, surge pricing, and earning opportunities in your area.",
+              },
+              {
+                icon: Users,
+                title: "Driver Community",
+                description: "Join thousands of drivers sharing tips, strategies, and success stories.",
+              },
+            ].map((feature, index) => (
+              <Card
+                key={index}
+                className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all hover:glow-gold hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gold/10 rounded-full flex items-center justify-center transition-all hover:bg-gold/20">
+                    <feature.icon className="w-8 h-8 text-gold" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gold">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Earnings Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
+            <div className="animate-in fade-in slide-in-from-left-8 duration-700">
+              <h2 className="text-4xl font-bold mb-6 text-gold glow-gold">Maximize Your Earnings</h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                Our intelligent platform analyzes your driving patterns, market conditions, and historical data to help
+                you earn more per hour. Get personalized recommendations on when and where to drive for maximum profit.
+              </p>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-2 h-2 rounded-full bg-gold" />
+                  </div>
+                  <span className="text-foreground">Track earnings across multiple platforms simultaneously</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-2 h-2 rounded-full bg-gold" />
+                  </div>
+                  <span className="text-foreground">Identify peak earning hours in your market</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-2 h-2 rounded-full bg-gold" />
+                  </div>
+                  <span className="text-foreground">Optimize routes and reduce dead miles</span>
+                </li>
+              </ul>
+            </div>
+            <div className="relative h-96 rounded-lg overflow-hidden border-2 border-gold/20 hover:border-gold/40 transition-all animate-in fade-in slide-in-from-right-8 duration-700">
+              <Image
+                src="/rideshare-earnings-dashboard-with-charts.jpg"
+                alt="Earnings Dashboard"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+
+          {/* Reality Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="relative h-96 rounded-lg overflow-hidden border-2 border-gold/20 hover:border-gold/40 transition-all order-2 md:order-1 animate-in fade-in slide-in-from-left-8 duration-700">
+              <Image src="/driver-using-smartphone-in-car.jpg" alt="Driver Reality" fill className="object-cover" />
+            </div>
+            <div className="order-1 md:order-2 animate-in fade-in slide-in-from-right-8 duration-700">
+              <h2 className="text-4xl font-bold mb-6 text-gold glow-gold">Built by Drivers, for Drivers</h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                We understand the challenges of gig economy work because we've been there. Boosted Earnings was created
+                by an experienced rideshare driver who wanted better tools to track and optimize earnings.
+              </p>
+              <p className="text-lg text-muted-foreground">
+                No more juggling multiple apps, spreadsheets, or guessing when to drive. Get the insights you need to
+                make informed decisions and boost your income.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-black to-card">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="animate-in fade-in slide-in-from-left-8 duration-700">
+              <h2 className="text-4xl font-bold mb-6 text-gold glow-gold">Ready to Get Started?</h2>
+              <p className="text-lg text-muted-foreground mb-8">
+                Join our beta program and be among the first to experience the future of rideshare earnings tracking.
+                Limited spots available.
+              </p>
+              <Button className="bg-gold hover:bg-gold-dark text-black font-semibold text-lg px-8 py-6 glow-gold transition-all hover:scale-[1.05]">
+                Join Beta Program
               </Button>
-              <Button asChild size="lg" variant="outline" className="text-base bg-transparent">
-                <Link href="/features">Explore Features</Link>
-              </Button>
+            </div>
+            <div className="relative h-96 rounded-lg overflow-hidden border-2 border-gold/20 hover:border-gold/40 transition-all animate-in fade-in slide-in-from-right-8 duration-700">
+              <Image src="/happy-rideshare-driver-with-smartphone.jpg" alt="Contact" fill className="object-cover" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="border-b border-border bg-card py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="text-center">
-              <div className="mb-2 text-4xl font-bold text-primary">$2,500+</div>
-              <div className="text-sm text-muted-foreground">Average Monthly Boost</div>
-            </div>
-            <div className="text-center">
-              <div className="mb-2 text-4xl font-bold text-primary">50K+</div>
-              <div className="text-sm text-muted-foreground">Active Drivers</div>
-            </div>
-            <div className="text-center">
-              <div className="mb-2 text-4xl font-bold text-primary">4.9★</div>
-              <div className="text-sm text-muted-foreground">App Store Rating</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Intro Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-4 text-balance text-3xl font-bold md:text-4xl">Built for Gig Economy Drivers</h2>
-            <p className="text-pretty text-lg text-muted-foreground">
-              Boosted Earnings is the ultimate companion app for rideshare and delivery drivers. We help you track every
-              mile, maximize your earnings, and make smarter decisions about when and where to drive.
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="border-border bg-card">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <DollarSign className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Income Tracking</h3>
-                <p className="text-sm text-muted-foreground">
-                  Automatically track earnings across all platforms. See your real-time income, tips, and bonuses in one
-                  place.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-card">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <MapPin className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Smart Route Optimization</h3>
-                <p className="text-sm text-muted-foreground">
-                  Get AI-powered suggestions for the best times and locations to drive based on historical data and
-                  demand patterns.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-card">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <BarChart3 className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Detailed Analytics</h3>
-                <p className="text-sm text-muted-foreground">
-                  Visualize your performance with charts and insights. Understand your hourly rate, peak hours, and
-                  top-earning zones.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-card">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <Calendar className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Mileage Logging</h3>
-                <p className="text-sm text-muted-foreground">
-                  Automatic mileage tracking for tax deductions. Never miss a mile with GPS-based logging and
-                  IRS-compliant reports.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-card">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <TrendingUp className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Earnings Forecasts</h3>
-                <p className="text-sm text-muted-foreground">
-                  Predict your weekly and monthly earnings based on your driving patterns and market trends.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-card">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Secure & Private</h3>
-                <p className="text-sm text-muted-foreground">
-                  Bank-level encryption keeps your data safe. We never sell your information to third parties.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="border-y border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold">What Drivers Are Saying</h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            <Card className="border-border">
-              <CardContent className="pt-6">
-                <div className="mb-4 text-primary">★★★★★</div>
-                <p className="mb-4 text-sm text-muted-foreground">
-                  "Boosted Earnings helped me increase my income by 30% in just two months. The insights are
-                  game-changing!"
-                </p>
-                <div className="font-semibold">Marcus T.</div>
-                <div className="text-sm text-muted-foreground">Uber Driver, Los Angeles</div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border">
-              <CardContent className="pt-6">
-                <div className="mb-4 text-primary">★★★★★</div>
-                <p className="mb-4 text-sm text-muted-foreground">
-                  "Finally, an app that understands what drivers need. The mileage tracking alone saves me hours during
-                  tax season."
-                </p>
-                <div className="font-semibold">Sarah K.</div>
-                <div className="text-sm text-muted-foreground">Lyft Driver, Chicago</div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border">
-              <CardContent className="pt-6">
-                <div className="mb-4 text-primary">★★★★★</div>
-                <p className="mb-4 text-sm text-muted-foreground">
-                  "The route optimization feature is incredible. I'm making more money while driving fewer miles."
-                </p>
-                <div className="font-semibold">James R.</div>
-                <div className="text-sm text-muted-foreground">DoorDash Driver, Miami</div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-balance text-3xl font-bold md:text-4xl">Ready to Boost Your Earnings?</h2>
-            <p className="mb-8 text-pretty text-lg text-muted-foreground">
-              Join thousands of drivers who are already maximizing their income with Boosted Earnings.
-            </p>
-            <Button asChild size="lg" className="text-base">
-              <Link href="/beta-signup">Get Early Access</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }

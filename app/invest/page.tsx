@@ -1,189 +1,264 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import { TrendingUp, Users, DollarSign, Target } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { TrendingUp, Users, Globe, Zap } from "lucide-react"
 
 export default function InvestPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    investorType: "regular",
+    heardFrom: "",
+    otherSource: "",
+    disclaimer: false,
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("Investment form submitted:", formData)
+    // Handle form submission
+  }
+
   return (
-    <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="border-b border-border py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="mb-4 text-balance text-4xl font-bold md:text-5xl">
-              Invest in the Future of <span className="text-primary">Gig Economy</span>
+    <div className="min-h-screen bg-black">
+      <Header />
+
+      {/* Hero Section with Background */}
+      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-black to-gold-dark/10 animate-in fade-in duration-1000" />
+        <div className="container mx-auto relative z-10">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance animate-in fade-in slide-in-from-bottom-4 duration-700">
+              Invest in the Future of <span className="text-gold glow-gold">Gig-Economy Technology</span>
             </h1>
-            <p className="mb-8 text-pretty text-lg text-muted-foreground">
-              Join us in empowering millions of gig workers to maximize their earnings and build better financial
-              futures.
-            </p>
-            <Button size="lg" className="text-base">
-              Request Investment Information
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Market Opportunity */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center mb-12">
-            <h2 className="mb-4 text-3xl font-bold">The Opportunity</h2>
-            <p className="text-muted-foreground">
-              The gig economy is exploding, and workers need better tools to succeed.
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 text-balance animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+              Join us in revolutionizing how millions of gig workers track and optimize their earnings
             </p>
           </div>
+        </div>
+      </section>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-border bg-card text-center">
-              <CardContent className="pt-6">
-                <div className="mb-4 text-4xl font-bold text-primary">$455B</div>
-                <div className="text-sm text-muted-foreground">Global Gig Economy Market Size</div>
-              </CardContent>
-            </Card>
+      {/* Features Grid */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gold glow-gold">
+            Why Invest in Boosted Earnings?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+            {[
+              {
+                icon: TrendingUp,
+                title: "Growing Market",
+                description:
+                  "The gig economy is projected to reach $455B by 2023, with millions of workers needing better tools.",
+              },
+              {
+                icon: Users,
+                title: "Proven Demand",
+                description: "Thousands of beta users already tracking over $10M in combined earnings on our platform.",
+              },
+              {
+                icon: Globe,
+                title: "Scalable Platform",
+                description:
+                  "Built on modern infrastructure ready to scale to millions of users across multiple markets.",
+              },
+              {
+                icon: Zap,
+                title: "First-Mover Advantage",
+                description:
+                  "Be part of the first comprehensive earnings platform designed specifically for gig workers.",
+              },
+            ].map((feature, index) => (
+              <Card
+                key={index}
+                className="bg-card/50 backdrop-blur-sm border-gold/20 hover:border-gold/50 transition-all hover:glow-gold hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gold/10 rounded-full flex items-center justify-center transition-all hover:bg-gold/20">
+                    <feature.icon className="w-8 h-8 text-gold" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gold">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-            <Card className="border-border bg-card text-center">
-              <CardContent className="pt-6">
-                <div className="mb-4 text-4xl font-bold text-primary">59M</div>
-                <div className="text-sm text-muted-foreground">Gig Workers in the US</div>
-              </CardContent>
-            </Card>
+          {/* Investment Form */}
+          <div className="max-w-3xl mx-auto">
+            <Card className="bg-card/50 backdrop-blur-sm border-2 border-gold/20 hover:border-gold/30 transition-all animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <CardContent className="p-8">
+                <h2 className="text-3xl font-bold mb-6 text-gold text-center glow-gold">Express Your Interest</h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-foreground">Full Name *</label>
+                      <Input
+                        type="text"
+                        placeholder="John Doe"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-foreground">Email Address *</label>
+                      <Input
+                        type="email"
+                        placeholder="john@example.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
 
-            <Card className="border-border bg-card text-center">
-              <CardContent className="pt-6">
-                <div className="mb-4 text-4xl font-bold text-primary">36%</div>
-                <div className="text-sm text-muted-foreground">Annual Market Growth Rate</div>
-              </CardContent>
-            </Card>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-foreground">Phone Number *</label>
+                    <Input
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
+                      required
+                    />
+                  </div>
 
-            <Card className="border-border bg-card text-center">
-              <CardContent className="pt-6">
-                <div className="mb-4 text-4xl font-bold text-primary">$1.5T</div>
-                <div className="text-sm text-muted-foreground">Projected Market by 2027</div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-foreground">Investor Type *</label>
+                    <div className="space-y-3">
+                      <div
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                          formData.investorType === "regular"
+                            ? "border-gold bg-gold/10 glow-gold"
+                            : "border-gold/30 hover:border-gold/50"
+                        }`}
+                        onClick={() => setFormData({ ...formData, investorType: "regular" })}
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="radio"
+                            name="investorType"
+                            value="regular"
+                            checked={formData.investorType === "regular"}
+                            onChange={(e) => setFormData({ ...formData, investorType: e.target.value })}
+                            className="mt-1 accent-gold"
+                          />
+                          <div>
+                            <h4 className="font-semibold text-gold">Regular Investor</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Individual investors interested in supporting innovative startups
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                          formData.investorType === "accredited"
+                            ? "border-gold bg-gold/10 glow-gold"
+                            : "border-gold/30 hover:border-gold/50"
+                        }`}
+                        onClick={() => setFormData({ ...formData, investorType: "accredited" })}
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="radio"
+                            name="investorType"
+                            value="accredited"
+                            checked={formData.investorType === "accredited"}
+                            onChange={(e) => setFormData({ ...formData, investorType: e.target.value })}
+                            className="mt-1 accent-gold"
+                          />
+                          <div>
+                            <h4 className="font-semibold text-gold">Accredited Investor</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Investors meeting SEC accreditation requirements with higher investment capacity
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-foreground">
+                      How did you hear about us? *
+                    </label>
+                    <Select
+                      value={formData.heardFrom}
+                      onValueChange={(value) => setFormData({ ...formData, heardFrom: value })}
+                    >
+                      <SelectTrigger className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all">
+                        <SelectValue placeholder="Select an option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="social-media">Social Media</SelectItem>
+                        <SelectItem value="referral">Referral</SelectItem>
+                        <SelectItem value="news">News Article</SelectItem>
+                        <SelectItem value="search">Search Engine</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {formData.heardFrom === "other" && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-foreground">Please specify</label>
+                      <Textarea
+                        placeholder="Tell us how you found us..."
+                        value={formData.otherSource}
+                        onChange={(e) => setFormData({ ...formData, otherSource: e.target.value })}
+                        className="bg-background border-2 border-gold/30 focus:border-gold text-foreground transition-all"
+                        rows={3}
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-start gap-3 p-4 bg-gold/5 rounded-lg border-2 border-gold/30">
+                    <Checkbox
+                      id="disclaimer"
+                      checked={formData.disclaimer}
+                      onCheckedChange={(checked) => setFormData({ ...formData, disclaimer: checked as boolean })}
+                      className="mt-1 border-2 border-gold data-[state=checked]:bg-gold data-[state=checked]:border-gold data-[state=checked]:text-black"
+                    />
+                    <label htmlFor="disclaimer" className="text-sm text-muted-foreground cursor-pointer">
+                      I understand that this is an expression of interest and not a commitment to invest. I acknowledge
+                      that all investments carry risk and I should conduct my own due diligence. I agree to receive
+                      information about investment opportunities from Boosted Earnings.
+                    </label>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={!formData.disclaimer}
+                    className="w-full bg-gold hover:bg-gold-dark text-black font-semibold text-lg py-6 glow-gold disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-[1.02]"
+                  >
+                    Submit Interest
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Why Invest */}
-      <section className="border-y border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold">Why Invest in Boosted Earnings?</h2>
-          <div className="grid gap-8 md:grid-cols-2">
-            <Card className="border-border bg-background">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <TrendingUp className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Proven Traction</h3>
-                <p className="text-sm text-muted-foreground">
-                  50,000+ active users with 40% month-over-month growth. Our users see an average income increase of 30%
-                  within the first 3 months.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-background">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Experienced Team</h3>
-                <p className="text-sm text-muted-foreground">
-                  Founded by former drivers and tech leaders from Google, Tesla, and DoorDash. We understand both the
-                  market and the technology.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-background">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <DollarSign className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Multiple Revenue Streams</h3>
-                <p className="text-sm text-muted-foreground">
-                  Subscription model with premium features, B2B partnerships with gig platforms, and data insights for
-                  market research firms.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-background">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <Target className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-semibold">Clear Path to Scale</h3>
-                <p className="text-sm text-muted-foreground">
-                  Expanding from rideshare to all gig economy sectors: delivery, freelancing, and task-based work. TAM
-                  of 59M+ workers in the US alone.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Funding Round */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="mb-6 text-3xl font-bold">Current Funding Round</h2>
-            <Card className="border-border bg-card">
-              <CardContent className="pt-6">
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div>
-                    <div className="mb-2 text-sm text-muted-foreground">Round Type</div>
-                    <div className="text-xl font-semibold">Series A</div>
-                  </div>
-                  <div>
-                    <div className="mb-2 text-sm text-muted-foreground">Target Raise</div>
-                    <div className="text-xl font-semibold text-primary">$10M</div>
-                  </div>
-                  <div>
-                    <div className="mb-2 text-sm text-muted-foreground">Valuation</div>
-                    <div className="text-xl font-semibold">$50M</div>
-                  </div>
-                  <div>
-                    <div className="mb-2 text-sm text-muted-foreground">Use of Funds</div>
-                    <div className="text-xl font-semibold">Product & Growth</div>
-                  </div>
-                </div>
-
-                <div className="mt-6 border-t border-border pt-6">
-                  <h3 className="mb-4 font-semibold">Use of Funds Breakdown</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• 40% - Product development and AI/ML capabilities</li>
-                    <li>• 30% - Marketing and user acquisition</li>
-                    <li>• 20% - Team expansion (engineering, data science)</li>
-                    <li>• 10% - Operations and infrastructure</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="border-t border-border bg-card py-20">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-3xl font-bold">Interested in Learning More?</h2>
-            <p className="mb-8 text-muted-foreground">
-              Contact our investor relations team to receive our pitch deck, financial projections, and additional
-              information.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button size="lg">Request Pitch Deck</Button>
-              <Button size="lg" variant="outline">
-                Schedule a Call
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }
