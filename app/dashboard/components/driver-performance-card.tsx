@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { TrendingUp, Clock, DollarSign, MapPin } from "lucide-react"
 import { useEffect, useState } from "react"
 
@@ -16,7 +17,11 @@ export function DriverPerformanceCard({ userId }: { userId?: string }) {
   useEffect(() => {
     async function fetchStats() {
       try {
+        setStats((prev) => ({ ...prev, loading: true }))
+
         // Mock data for now - will be replaced with real API call
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
         setStats({
           trips: 12,
           hours: 8.5,
@@ -48,39 +53,50 @@ export function DriverPerformanceCard({ userId }: { userId?: string }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <MapPin className="w-4 h-4" />
-              <span>Trips</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{stats.trips}</p>
+        {stats.loading ? (
+          <div className="grid grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-20 bg-muted/20" />
+                <Skeleton className="h-8 w-16 bg-muted/20" />
+              </div>
+            ))}
           </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <MapPin className="w-4 h-4" />
+                <span>Trips</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{stats.trips}</p>
+            </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Clock className="w-4 h-4" />
-              <span>Hours</span>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <Clock className="w-4 h-4" />
+                <span>Hours</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{stats.hours.toFixed(1)}</p>
             </div>
-            <p className="text-2xl font-bold text-foreground">{stats.hours.toFixed(1)}</p>
-          </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <DollarSign className="w-4 h-4" />
-              <span>Avg Trip</span>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <DollarSign className="w-4 h-4" />
+                <span>Avg Trip</span>
+              </div>
+              <p className="text-2xl font-bold text-gold">${stats.avgTripEarnings.toFixed(2)}</p>
             </div>
-            <p className="text-2xl font-bold text-gold">${stats.avgTripEarnings.toFixed(2)}</p>
-          </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <DollarSign className="w-4 h-4" />
-              <span>Avg Tip</span>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <DollarSign className="w-4 h-4" />
+                <span>Avg Tip</span>
+              </div>
+              <p className="text-2xl font-bold text-gold">${stats.avgTip.toFixed(2)}</p>
             </div>
-            <p className="text-2xl font-bold text-gold">${stats.avgTip.toFixed(2)}</p>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   )

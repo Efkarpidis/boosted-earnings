@@ -13,15 +13,17 @@ import { WeeklyComparison } from "@/components/dashboard/weekly-comparison"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { useAuth } from "@/components/auth/auth-provider"
 import { useToast } from "@/hooks/use-toast"
-import { TrendingUp, DollarSign, Clock, TrendingDown, LinkIcon, AlertCircle } from "lucide-react"
+import { TrendingUp, DollarSign, Clock, TrendingDown, LinkIcon, AlertCircle, CheckCircle2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { DriverPerformanceCard } from "./components/driver-performance-card"
 import { EarningsTrendChart } from "./components/earnings-trend-chart"
 import { PlatformBreakdownChart as ArgylePlatformBreakdown } from "./components/platform-breakdown-chart"
+import { useRouter } from "next/navigation"
 
 function DashboardContent() {
   const { user } = useAuth()
   const { toast } = useToast()
+  const router = useRouter()
   const [timeRange, setTimeRange] = useState("week")
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
   const [earningsData, setEarningsData] = useState<any>(null)
@@ -32,6 +34,9 @@ function DashboardContent() {
   const [linkToken, setLinkToken] = useState<string | null>(null)
   const [currentPlatform, setCurrentPlatform] = useState<string | null>(null)
   const [syncing, setSyncing] = useState(false)
+  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([])
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [showEmptyState, setShowEmptyState] = useState(false)
 
   const onSuccess = useCallback(
     async (publicToken: string, metadata: any) => {
@@ -208,14 +213,16 @@ function DashboardContent() {
       if (data.mock) {
         toast({
           title: "Sandbox Mode",
-          description: `Synced ${data.newTrips} trips and ${data.newEarnings} earnings (mock data). Configure ARGYLE_CLIENT_ID and ARGYLE_SECRET for real data.`,
+          description: `Synced ${data.tripsUpserted} trips and ${data.earningsUpserted} earnings (mock data).`,
         })
       } else {
         toast({
           title: "Sync Complete",
-          description: `Synced ${data.newTrips} trips and ${data.newEarnings} earnings from Argyle.`,
+          description: `Synced ${data.tripsUpserted} trips and ${data.earningsUpserted} earnings.`,
         })
       }
+
+      setLastUpdated(new Date())
     } catch (error: any) {
       console.error("Error syncing trips:", error)
       toast({
@@ -260,6 +267,26 @@ function DashboardContent() {
       open()
     }
   }, [linkToken, ready, open])
+
+  useEffect(() => {
+    async function fetchConnections() {
+      try {
+        const response = await fetch(`/api/argyle/connections?userId=${user?.uid}`)
+        const data = await response.json()
+        setConnectedAccounts(data.connections || [])
+        setShowEmptyState(data.connections?.length === 0)
+        if (data.connections?.length > 0) {
+          setLastUpdated(new Date(data.connections[0].lastSyncAt))
+        }
+      } catch (error) {
+        console.error("Error fetching connections:", error)
+      }
+    }
+
+    if (user) {
+      fetchConnections()
+    }
+  }, [user])
 
   const stats = earningsData || {
     totalEarnings: 2847.5,
@@ -314,6 +341,70 @@ function DashboardContent() {
                 PLAID_ENV=sandbox) to test with real sandbox accounts.
               </AlertDescription>
             </Alert>
+          )}
+
+          {showEmptyState && (
+            <Card className="bg-card/50 backdrop-blur-sm border-gold/20 mb-8">
+              <CardContent className="p-12 text-center">
+                <LinkIcon className="w-16 h-16 text-gold mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-foreground mb-2">Connect Your Rideshare Accounts</h2>
+                <p className="text-muted-foreground mb-6">
+                  Get started by connecting your Uber, Lyft, DoorDash, or Uber Eats account to track your earnings in
+                  real-time.
+                </p>
+                <Button
+                  onClick={() => router.push("/connect")}
+                  size="lg"
+                  className="bg-gold hover:bg-gold-dark text-black font-semibold"
+                >
+                  Connect Accounts
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {connectedAccounts.length > 0 && (
+            <Card className="bg-card/50 backdrop-blur-sm border-gold/20 mb-8">
+              <CardHeader>
+                <CardTitle className="text-gold flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5" />
+                    Connected Accounts
+                  </span>
+                  {lastUpdated && (
+                    <span className="text-sm text-muted-foreground font-normal">
+                      Last updated: {lastUpdated.toLocaleString()}
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {connectedAccounts.map((account) => (
+                    <div
+                      key={account.platform}
+                      className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-gold/20"
+                    >
+                      <div>
+                        <p className="font-semibold text-foreground">{account.platform}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(account.lastSyncAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => handleSyncTrips()}
+                        disabled={syncing}
+                        size="sm"
+                        variant="ghost"
+                        className="text-gold hover:text-gold-dark"
+                      >
+                        Sync
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Connect Platforms Section */}
