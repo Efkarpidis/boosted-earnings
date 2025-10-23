@@ -13,7 +13,6 @@ This guide will help you set up Argyle integration for real-time rideshare earni
    
    Add these to your `.env.local` file:
    \`\`\`bash
-   ARGYLE_LINK_KEY=your_link_key_here
    ARGYLE_CLIENT_ID=your_client_id_here
    ARGYLE_SECRET=your_secret_here
    ARGYLE_ENV=sandbox
@@ -32,6 +31,30 @@ This guide will help you set up Argyle integration for real-time rideshare earni
    Use sandbox test credentials to connect platforms:
    - Username: `argyle`
    - Password: `sandbox`
+
+## User Token Flow (New)
+
+**How it works:**
+1. User clicks "Connect Your Accounts" on `/connect` page
+2. Frontend calls `/api/argyle/user-token` with the user's ID
+3. Backend generates a fresh user token via Argyle's API using your Client ID and Secret
+4. Frontend receives the user token and initializes Argyle Link with it
+5. User completes authentication in Argyle Link modal
+6. On success, authorization code is exchanged for access token
+7. Data sync begins automatically
+
+**Benefits:**
+- No static keys exposed to frontend
+- Each user gets their own token
+- Tokens are short-lived and secure
+- Works seamlessly in mock mode
+
+**Environment Matrix:**
+
+| Mode | Required Env Vars | Link Behavior |
+|------|------------------|---------------|
+| **Mock** (`ARGYLE_MOCK=1`) | None | Returns deterministic mock token, shows demo UI |
+| **Real** (production) | `ARGYLE_CLIENT_ID`, `ARGYLE_SECRET` | Generates real user token via API |
 
 ## Webhook Setup
 
@@ -60,10 +83,10 @@ This guide will help you set up Argyle integration for real-time rideshare earni
 
 ## API Testing
 
-### Create Link Token
+### Create User Token (New)
 
 \`\`\`bash
-curl -X POST http://localhost:3000/api/argyle/link-token \
+curl -X POST http://localhost:3000/api/argyle/user-token \
   -H "Content-Type: application/json" \
   -d '{"userId":"test-user"}'
 \`\`\`
@@ -71,8 +94,9 @@ curl -X POST http://localhost:3000/api/argyle/link-token \
 Expected response:
 \`\`\`json
 {
-  "linkToken": "link_sandbox_abc123...",
-  "mock": false
+  "userToken": "user_sandbox_abc123...",
+  "mock": false,
+  "isMockMode": false
 }
 \`\`\`
 
@@ -193,7 +217,6 @@ The app validates required environment variables on startup:
 - `MONGODB_URI`
 
 **Required (non-mock mode):**
-- `ARGYLE_LINK_KEY`
 - `ARGYLE_CLIENT_ID`
 - `ARGYLE_SECRET`
 
@@ -202,7 +225,11 @@ The app validates required environment variables on startup:
 - `CRON_SECRET` (cron endpoint authentication)
 
 **Mock Mode:**
-Set `ARGYLE_MOCK=1` to use sample data without real Argyle credentials.
+Set `ARGYLE_MOCK=1` to use sample data without real Argyle credentials. The app will:
+- Return deterministic mock user tokens
+- Skip real API calls
+- Use sample trip/earnings data
+- Allow full UI testing without credentials
 
 ## Pricing
 
