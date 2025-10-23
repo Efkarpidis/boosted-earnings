@@ -196,6 +196,24 @@ export interface DriverBalance {
   lastSyncedAt: Date
 }
 
+export interface DriverConnection {
+  userId: string
+  platform: "Uber" | "Lyft" | "DoorDash" | "UberEats"
+  providerUserId: string
+  itemId: string
+  accessToken: string
+  connectedAt: Date
+  lastSyncAt?: Date
+  status: "connected" | "disconnected" | "error"
+  // Cursor tokens for incremental sync
+  lastActivitiesCursor?: string
+  lastEarningsCursor?: string
+  lastBalancesCursor?: string
+  // Error tracking
+  lastError?: string
+  errorCount: number
+}
+
 // Collection getters
 export async function getPlaidAccountsCollection() {
   const client = await clientPromise
@@ -276,6 +294,12 @@ export async function getDriverEarningsCollection() {
 export async function getDriverBalancesCollection() {
   const client = await clientPromise
   return client.db("boosted_earnings").collection<DriverBalance>("driver_balances")
+}
+
+// Collection getters for DriverConnection
+export async function getDriverConnectionsCollection() {
+  const client = await clientPromise
+  return client.db("boosted_earnings").collection<DriverConnection>("driver_connections")
 }
 
 // Helper functions to save data
@@ -390,4 +414,24 @@ export async function saveDriverBalance(balance: DriverBalance) {
     { $set: balance },
     { upsert: true },
   )
+}
+
+// Helper functions for DriverConnection
+export async function saveDriverConnection(connection: DriverConnection) {
+  const collection = await getDriverConnectionsCollection()
+  await collection.updateOne(
+    { userId: connection.userId, platform: connection.platform },
+    { $set: connection },
+    { upsert: true },
+  )
+}
+
+export async function getDriverConnection(userId: string, platform: string) {
+  const collection = await getDriverConnectionsCollection()
+  return await collection.findOne({ userId, platform })
+}
+
+export async function getAllDriverConnections(userId: string) {
+  const collection = await getDriverConnectionsCollection()
+  return await collection.find({ userId, status: "connected" }).toArray()
 }

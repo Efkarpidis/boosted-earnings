@@ -1,95 +1,140 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getEarnings, getActivities, getBalances } from "@/lib/argyle"
-import { getArgyleItemsCollection, saveDriverEarning, saveDriverTrip, saveDriverBalance } from "@/lib/mongodb-schemas"
+import {
+  getDriverConnectionsCollection,
+  saveDriverEarning,
+  saveDriverTrip,
+  saveDriverBalance,
+  saveDriverConnection,
+} from "@/lib/mongodb-schemas"
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, itemId } = await request.json()
+    const { userId, platform, backfill } = await request.json()
 
-    if (!userId && !itemId) {
-      return NextResponse.json({ error: "Missing required field: userId or itemId" }, { status: 400 })
+    if (!userId) {
+      return NextResponse.json({ error: "Missing required field: userId" }, { status: 400 })
     }
 
-    const itemsCollection = await getArgyleItemsCollection()
-    const query = itemId ? { itemId } : userId ? { userId } : {}
-    const items = await itemsCollection.find(query).toArray()
+    const connectionsCollection = await getDriverConnectionsCollection()
+    const query: any = { userId, status: "connected" }
+    if (platform) query.platform = platform
 
-    if (items.length === 0) {
-      return NextResponse.json({ error: "No Argyle items found for this user" }, { status: 404 })
+    const connections = await connectionsCollection.find(query).toArray()
+
+    if (connections.length === 0) {
+      return NextResponse.json({ error: "No connected accounts found for this user" }, { status: 404 })
     }
 
-    let itemsSynced = 0
-    let newTrips = 0
-    const updatedTrips = 0
-    let newEarnings = 0
-    const updatedEarnings = 0
+    let totalTripsUpserted = 0
+    let totalEarningsUpserted = 0
+    let totalBalancesUpserted = 0
+    let totalPagesFetched = 0
 
-    for (const item of items) {
-      const [earningsResult, activitiesResult, balancesResult] = await Promise.all([
-        getEarnings({ accessToken: item.accessToken, userId: item.userId }),
-        getActivities({ accessToken: item.accessToken, userId: item.userId }),
-        getBalances({ accessToken: item.accessToken, userId: item.userId }),
-      ])
+    for (const connection of connections) {
+      try {
+        // Determine since date for incremental sync
+        const sinceDate = backfill
+          ? new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0] // 365 days ago
+          : connection.lastSyncAt
+            ? new Date(connection.lastSyncAt).toISOString().split("T")[0]
+            : undefined
 
-      if (earningsResult.data?.results) {
-        for (const earning of earningsResult.data.results) {
-          await saveDriverEarning({
-            userId: item.userId,
-            platform: item.platform,
-            earningId: earning.id,
-            totalAmount: earning.total || 0,
-            tips: earning.tips || 0,
-            bonuses: earning.bonuses || 0,
-            startDate: earning.start_date,
-            endDate: earning.end_date,
-            payoutStatus: earning.payout_status || "pending",
-            updatedAt: new Date(),
-          })
-          newEarnings++
+        console.log(`[Argyle Sync] Syncing ${connection.platform} for user ${userId}, since=${sinceDate || "all time"}`)
+
+        // Fetch data with pagination
+        const [earningsResult, activitiesResult, balancesResult] = await Promise.all([
+          getEarnings({ accessToken: connection.accessToken, userId: connection.userId, since: sinceDate }),
+          getActivities({ accessToken: connection.accessToken, userId: connection.userId, since: sinceDate }),
+          getBalances({ accessToken: connection.accessToken, userId: connection.userId }),
+        ])
+
+        totalPagesFetched += (earningsResult.pagesFetched || 0) + (activitiesResult.pagesFetched || 0)
+
+        // Upsert earnings
+        if (earningsResult.data?.results) {
+          for (const earning of earningsResult.data.results) {
+            await saveDriverEarning({
+              userId: connection.userId,
+              platform: connection.platform,
+              earningId: earning.id,
+              totalAmount: earning.total || 0,
+              tips: earning.tips || 0,
+              bonuses: earning.bonuses || 0,
+              startDate: earning.start_date,
+              endDate: earning.end_date,
+              payoutStatus: earning.payout_status || "pending",
+              updatedAt: new Date(),
+            })
+            totalEarningsUpserted++
+          }
         }
-      }
 
-      if (activitiesResult.data?.results) {
-        for (const activity of activitiesResult.data.results) {
-          await saveDriverTrip({
-            userId: item.userId,
-            platform: item.platform,
-            tripId: activity.id,
-            startTime: new Date(activity.start_time),
-            endTime: new Date(activity.end_time),
-            distanceMiles: activity.distance || 0,
-            durationMin: activity.duration || 0,
-            status: activity.status || "completed",
-            earningsTip: activity.earnings?.tip || 0,
-            earningsBase: activity.earnings?.base || 0,
-            city: activity.location?.city,
-            createdAt: new Date(),
-          })
-          newTrips++
+        // Upsert activities/trips
+        if (activitiesResult.data?.results) {
+          for (const activity of activitiesResult.data.results) {
+            await saveDriverTrip({
+              userId: connection.userId,
+              platform: connection.platform,
+              tripId: activity.id,
+              startTime: new Date(activity.start_time),
+              endTime: new Date(activity.end_time),
+              distanceMiles: activity.distance || 0,
+              durationMin: activity.duration || 0,
+              status: activity.status || "completed",
+              earningsTip: activity.earnings?.tip || 0,
+              earningsBase: activity.earnings?.base || 0,
+              city: activity.location?.city,
+              createdAt: new Date(),
+            })
+            totalTripsUpserted++
+          }
         }
-      }
 
-      if (balancesResult.data?.results) {
-        for (const balance of balancesResult.data.results) {
-          await saveDriverBalance({
-            userId: item.userId,
-            platform: item.platform,
-            balanceAmount: balance.balance || 0,
-            lastSyncedAt: new Date(),
-          })
+        // Upsert balances
+        if (balancesResult.data?.results) {
+          for (const balance of balancesResult.data.results) {
+            await saveDriverBalance({
+              userId: connection.userId,
+              platform: connection.platform,
+              balanceAmount: balance.balance || 0,
+              lastSyncedAt: new Date(),
+            })
+            totalBalancesUpserted++
+          }
         }
-      }
 
-      itemsSynced++
+        // Update connection with last sync time and clear errors
+        await saveDriverConnection({
+          ...connection,
+          lastSyncAt: new Date(),
+          errorCount: 0,
+          lastError: undefined,
+        })
+
+        console.log(
+          `[Argyle Sync] Completed ${connection.platform}: trips=${totalTripsUpserted}, earnings=${totalEarningsUpserted}, pages=${totalPagesFetched}`,
+        )
+      } catch (error: any) {
+        console.error(`[Argyle Sync] Error syncing ${connection.platform}:`, error)
+
+        // Update connection with error
+        await saveDriverConnection({
+          ...connection,
+          lastError: error.message,
+          errorCount: (connection.errorCount || 0) + 1,
+          status: connection.errorCount >= 3 ? "error" : "connected",
+        })
+      }
     }
 
     return NextResponse.json({
-      itemsSynced,
-      newTrips,
-      updatedTrips,
-      newEarnings,
-      updatedEarnings,
-      mock: items[0]?.accessToken?.startsWith("mock-") || false,
+      tripsUpserted: totalTripsUpserted,
+      earningsUpserted: totalEarningsUpserted,
+      balancesUpserted: totalBalancesUpserted,
+      pagesFetched: totalPagesFetched,
+      connectionsSynced: connections.length,
+      mock: connections[0]?.accessToken?.startsWith("mock-") || false,
     })
   } catch (error: any) {
     console.error("[Argyle Sync] Error:", error)

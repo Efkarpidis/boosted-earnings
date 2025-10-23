@@ -1,11 +1,12 @@
 import axios, { type AxiosInstance } from "axios"
+import { env } from "./env"
 
-const argyleApiBase = process.env.ARGYLE_API_BASE || "https://api.argyle.com/v2"
-const argyleClientId = process.env.ARGYLE_CLIENT_ID
-const argyleSecret = process.env.ARGYLE_SECRET
+const argyleApiBase = env.argyleApiBase
+const argyleClientId = env.argyleClientId
+const argyleSecret = env.argyleSecret
 
 export const isArgyleConfigured = () => {
-  return !!(argyleClientId && argyleSecret)
+  return !!(argyleClientId && argyleSecret) && !env.isMockMode
 }
 
 let argyleClient: AxiosInstance | null = null
@@ -21,6 +22,67 @@ if (isArgyleConfigured()) {
       "Content-Type": "application/json",
     },
   })
+}
+
+async function retryWithBackoff<T>(fn: () => Promise<T>, maxAttempts = 3, baseDelay = 100): Promise<T> {
+  let lastError: Error | null = null
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn()
+    } catch (error: any) {
+      lastError = error
+      const status = error.response?.status
+
+      // Don't retry on 4xx errors (except 429)
+      if (status && status >= 400 && status < 500 && status !== 429) {
+        throw error
+      }
+
+      if (attempt < maxAttempts) {
+        const delay = Math.min(baseDelay * Math.pow(1.6, attempt - 1), 1600)
+        console.log(`[Argyle] Retry attempt ${attempt}/${maxAttempts} after ${delay}ms`)
+        await new Promise((resolve) => setTimeout(resolve, delay))
+      }
+    }
+  }
+
+  throw lastError
+}
+
+export async function fetchAllPages<T>(
+  endpoint: string,
+  accessToken?: string,
+  params: Record<string, any> = {},
+): Promise<{ results: T[]; pagesFetched: number }> {
+  if (!isArgyleConfigured() || !argyleClient) {
+    return { results: [], pagesFetched: 0 }
+  }
+
+  const allResults: T[] = []
+  let cursor: string | null = null
+  let pagesFetched = 0
+
+  do {
+    const response = await retryWithBackoff(async () => {
+      return await argyleClient!.get(endpoint, {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        params: { ...params, cursor },
+      })
+    })
+
+    const data = response.data
+    if (data.results && Array.isArray(data.results)) {
+      allResults.push(...data.results)
+    }
+
+    cursor = data.next || null
+    pagesFetched++
+
+    console.log(`[Argyle] Fetched page ${pagesFetched} from ${endpoint}, got ${data.results?.length || 0} items`)
+  } while (cursor)
+
+  return { results: allResults, pagesFetched }
 }
 
 // Mock responses for when Argyle is not configured
@@ -68,39 +130,49 @@ const mockBalances = {
   ],
 }
 
-export async function getEarnings({ accessToken, userId }: { accessToken?: string; userId?: string }) {
+export async function getEarnings({
+  accessToken,
+  userId,
+  since,
+}: { accessToken?: string; userId?: string; since?: string }) {
   if (!isArgyleConfigured() || !argyleClient) {
     console.warn("[Argyle] Not configured, returning mock earnings")
-    return { data: mockEarnings, mock: true }
+    return { data: mockEarnings, mock: true, pagesFetched: 0 }
   }
 
   try {
-    const response = await argyleClient.get("/earnings", {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      params: userId ? { user: userId } : {},
-    })
-    return { data: response.data, mock: false }
+    const params: Record<string, any> = {}
+    if (userId) params.user = userId
+    if (since) params.from_start_date = since
+
+    const { results, pagesFetched } = await fetchAllPages("/earnings", accessToken, params)
+    return { data: { results }, mock: false, pagesFetched }
   } catch (error: any) {
     console.error("[Argyle] Error fetching earnings:", error.message)
-    return { data: mockEarnings, mock: true, error: error.message }
+    return { data: mockEarnings, mock: true, error: error.message, pagesFetched: 0 }
   }
 }
 
-export async function getActivities({ accessToken, userId }: { accessToken?: string; userId?: string }) {
+export async function getActivities({
+  accessToken,
+  userId,
+  since,
+}: { accessToken?: string; userId?: string; since?: string }) {
   if (!isArgyleConfigured() || !argyleClient) {
     console.warn("[Argyle] Not configured, returning mock activities")
-    return { data: mockActivities, mock: true }
+    return { data: mockActivities, mock: true, pagesFetched: 0 }
   }
 
   try {
-    const response = await argyleClient.get("/activities", {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      params: userId ? { user: userId } : {},
-    })
-    return { data: response.data, mock: false }
+    const params: Record<string, any> = {}
+    if (userId) params.user = userId
+    if (since) params.from_start_time = since
+
+    const { results, pagesFetched } = await fetchAllPages("/activities", accessToken, params)
+    return { data: { results }, mock: false, pagesFetched }
   } catch (error: any) {
     console.error("[Argyle] Error fetching activities:", error.message)
-    return { data: mockActivities, mock: true, error: error.message }
+    return { data: mockActivities, mock: true, error: error.message, pagesFetched: 0 }
   }
 }
 
@@ -111,9 +183,11 @@ export async function getBalances({ accessToken, userId }: { accessToken?: strin
   }
 
   try {
-    const response = await argyleClient.get("/balances", {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      params: userId ? { user: userId } : {},
+    const response = await retryWithBackoff(async () => {
+      return await argyleClient!.get("/balances", {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        params: userId ? { user: userId } : {},
+      })
     })
     return { data: response.data, mock: false }
   } catch (error: any) {
@@ -134,5 +208,23 @@ export async function exchangeCode(code: string) {
   } catch (error: any) {
     console.error("[Argyle] Error exchanging code:", error.message)
     return { access_token: `mock-token-${Date.now()}`, item_id: `mock-item-${Date.now()}`, mock: true }
+  }
+}
+
+export async function createLinkToken(userId: string) {
+  if (!isArgyleConfigured() || !argyleClient) {
+    console.warn("[Argyle] Not configured, returning mock link token")
+    return { link_token: `mock-link-token-${Date.now()}`, mock: true }
+  }
+
+  try {
+    const response = await argyleClient.post("/link-tokens", {
+      user_id: userId,
+      redirect_uri: `${env.appUrl}/connect/callback`,
+    })
+    return { link_token: response.data.token, mock: false }
+  } catch (error: any) {
+    console.error("[Argyle] Error creating link token:", error.message)
+    return { link_token: `mock-link-token-${Date.now()}`, mock: true }
   }
 }

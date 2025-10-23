@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
+import { env } from "@/lib/env"
 import { saveDriverEarning, saveDriverTrip, saveDriverBalance } from "@/lib/mongodb-schemas"
 
 function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
@@ -13,18 +14,54 @@ export async function POST(request: NextRequest) {
   try {
     const payload = await request.text()
     const signature = request.headers.get("x-argyle-signature") || ""
-    const webhookSecret = process.env.ARGYLE_WEBHOOK_SECRET
+    const webhookSecret = env.argyleWebhookSecret
 
-    if (webhookSecret && signature) {
+    // Enforce signature verification if secret is configured
+    if (webhookSecret) {
+      if (!signature) {
+        console.error("[Argyle Webhook] Missing signature header")
+        return NextResponse.json({ error: "Missing signature" }, { status: 400 })
+      }
+
       const isValid = verifyWebhookSignature(payload, signature, webhookSecret)
       if (!isValid) {
         console.error("[Argyle Webhook] Invalid signature")
         return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
       }
+    } else {
+      console.warn("[Argyle Webhook] Signature verification disabled - ARGYLE_WEBHOOK_SECRET not set")
     }
 
     const event = JSON.parse(payload)
     const { event: eventType, data } = event
+
+    // Log only event metadata, not PII
+    console.log(`[Argyle Webhook] event=${eventType}, data_count=${Array.isArray(data) ? data.length : 1}`)
+
+    // Handle relevant events by triggering a sync
+    const relevantEvents = [
+      "connection.updated",
+      "data.ready",
+      "employment.data.updated",
+      "earnings.created",
+      "earnings.updated",
+      "activities.created",
+      "activities.updated",
+    ]
+
+    if (relevantEvents.includes(eventType)) {
+      // Trigger async sync (don't await to respond quickly)
+      const userId = data?.user_id || data?.[0]?.user_id
+      if (userId) {
+        fetch(`${env.appUrl}/api/argyle/sync`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        }).catch((error) => {
+          console.error("[Argyle Webhook] Failed to trigger sync:", error)
+        })
+      }
+    }
 
     let count = 0
 
@@ -94,9 +131,9 @@ export async function POST(request: NextRequest) {
         console.log(`[Argyle Webhook] Unhandled event type: ${eventType}`)
     }
 
-    return NextResponse.json({ received: true, processed: count })
+    return NextResponse.json({ received: true, event: eventType, processed: count })
   } catch (error: any) {
-    console.error("[Argyle Webhook] Error:", error)
-    return NextResponse.json({ error: error.message || "Webhook processing failed" }, { status: 500 })
+    console.error("[Argyle Webhook] Error:", error.message)
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 })
   }
 }
