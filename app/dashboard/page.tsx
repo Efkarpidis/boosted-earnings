@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { usePlaidLink } from "react-plaid-link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -18,6 +18,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { DriverPerformanceCard } from "./components/driver-performance-card"
 import { EarningsTrendChart } from "./components/earnings-trend-chart"
 import { PlatformBreakdownChart as ArgylePlatformBreakdown } from "./components/platform-breakdown-chart"
+import { ArgyleLink } from "@/app/connect/argyle-link"
 import { useRouter } from "next/navigation"
 
 function DashboardContent() {
@@ -37,9 +38,13 @@ function DashboardContent() {
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([])
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [showEmptyState, setShowEmptyState] = useState(false)
+  const [argyleUserToken, setArgyleUserToken] = useState<string | null>(null)
+  const [showArgyleLink, setShowArgyleLink] = useState(false)
+  const [dashboardStats, setDashboardStats] = useState<any>(null)
 
-  const onSuccess = useCallback(
-    async (publicToken: string, metadata: any) => {
+  const { open, ready } = usePlaidLink({
+    token: linkToken,
+    onSuccess: async (publicToken: string, metadata: any) => {
       if (!currentPlatform) return
 
       setLoading(true)
@@ -139,12 +144,6 @@ function DashboardContent() {
         setCurrentPlatform(null)
       }
     },
-    [currentPlatform, user, connectedPlatforms, toast],
-  )
-
-  const { open, ready } = usePlaidLink({
-    token: linkToken,
-    onSuccess,
   })
 
   const handleConnectPlatform = async (platform: string) => {
@@ -200,6 +199,47 @@ function DashboardContent() {
   }
 
   const handleSyncTrips = async () => {
+    // Check if user has any connected accounts
+    if (connectedAccounts.length === 0) {
+      // Open Argyle Link to connect first
+      setSyncing(true)
+      try {
+        const response = await fetch("/api/argyle/user-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user?.uid || "test-user" }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to get user token")
+        }
+
+        if (data.mock) {
+          toast({
+            title: "Sandbox Mode",
+            description:
+              "Opening Argyle Link in sandbox mode. Configure ARGYLE_CLIENT_ID and ARGYLE_SECRET for real data.",
+          })
+        }
+
+        setArgyleUserToken(data.userToken)
+        setShowArgyleLink(true)
+      } catch (error: any) {
+        console.error("[v0] Error getting user token:", error)
+        toast({
+          title: "Connection Failed",
+          description: error.message || "Failed to initialize Argyle Link.",
+          variant: "destructive",
+        })
+      } finally {
+        setSyncing(false)
+      }
+      return
+    }
+
+    // Sync existing connections
     setSyncing(true)
     try {
       const response = await fetch("/api/argyle/sync", {
@@ -210,6 +250,10 @@ function DashboardContent() {
 
       const data = await response.json()
 
+      if (!response.ok) {
+        throw new Error(data.error || "Sync failed")
+      }
+
       if (data.mock) {
         toast({
           title: "Sandbox Mode",
@@ -217,14 +261,15 @@ function DashboardContent() {
         })
       } else {
         toast({
-          title: "Sync Complete",
+          title: "Sync Complete!",
           description: `Synced ${data.tripsUpserted} trips and ${data.earningsUpserted} earnings.`,
         })
       }
 
       setLastUpdated(new Date())
+      await fetchDashboardStats()
     } catch (error: any) {
-      console.error("Error syncing trips:", error)
+      console.error("[v0] Error syncing trips:", error)
       toast({
         title: "Sync Failed",
         description: error.message || "Failed to sync trips from Argyle.",
@@ -262,6 +307,79 @@ function DashboardContent() {
     }
   }
 
+  const handleArgyleLinkSuccess = async (code: string, metadata: any) => {
+    console.log("[v0] Argyle Link success:", { code, metadata })
+    setShowArgyleLink(false)
+    setLoading(true)
+
+    try {
+      // Exchange code for access token
+      const exchangeResponse = await fetch("/api/argyle/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          userId: user?.uid || "test-user",
+          platform: metadata.account || "Uber",
+        }),
+      })
+
+      const exchangeData = await exchangeResponse.json()
+
+      if (!exchangeResponse.ok) {
+        throw new Error(exchangeData.error || "Failed to exchange code")
+      }
+
+      toast({
+        title: "Connection Successful!",
+        description: `Connected to ${exchangeData.platform}. Syncing your trip data...`,
+      })
+
+      // Trigger sync immediately after connection
+      await handleSyncTrips()
+
+      // Refresh connections list
+      await fetchConnections()
+      await fetchDashboardStats()
+    } catch (error: any) {
+      console.error("[v0] Error exchanging Argyle code:", error)
+      toast({
+        title: "Connection Error",
+        description: error.message || "Failed to complete connection.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch(`/api/dashboard/stats?userId=${user?.uid || "test-user"}`)
+      const data = await response.json()
+
+      if (response.ok && data.stats) {
+        setDashboardStats(data.stats)
+      }
+    } catch (error) {
+      console.error("[v0] Error fetching dashboard stats:", error)
+    }
+  }
+
+  const fetchConnections = async () => {
+    try {
+      const response = await fetch(`/api/argyle/connections?userId=${user?.uid}`)
+      const data = await response.json()
+      setConnectedAccounts(data.connections || [])
+      setShowEmptyState(data.connections?.length === 0)
+      if (data.connections?.length > 0) {
+        setLastUpdated(new Date(data.connections[0].lastSyncAt))
+      }
+    } catch (error) {
+      console.error("[v0] Error fetching connections:", error)
+    }
+  }
+
   useEffect(() => {
     if (linkToken && ready) {
       open()
@@ -269,39 +387,38 @@ function DashboardContent() {
   }, [linkToken, ready, open])
 
   useEffect(() => {
-    async function fetchConnections() {
-      try {
-        const response = await fetch(`/api/argyle/connections?userId=${user?.uid}`)
-        const data = await response.json()
-        setConnectedAccounts(data.connections || [])
-        setShowEmptyState(data.connections?.length === 0)
-        if (data.connections?.length > 0) {
-          setLastUpdated(new Date(data.connections[0].lastSyncAt))
-        }
-      } catch (error) {
-        console.error("Error fetching connections:", error)
-      }
-    }
-
     if (user) {
       fetchConnections()
+      fetchDashboardStats()
     }
   }, [user])
 
-  const stats = earningsData || {
-    totalEarnings: 2847.5,
-    earningsChange: 12.5,
-    hoursWorked: 42.5,
-    hoursChange: -5.2,
-    avgHourly: 67.0,
-    avgHourlyChange: 18.7,
-    trips: 156,
-    tripsChange: 8.3,
-  }
+  const stats = dashboardStats ||
+    earningsData || {
+      totalEarnings: 2847.5,
+      earningsChange: 12.5,
+      hoursWorked: 42.5,
+      hoursChange: -5.2,
+      avgHourly: 67.0,
+      avgHourlyChange: 18.7,
+      trips: 156,
+      tripsChange: 8.3,
+    }
 
   return (
     <div className="min-h-screen bg-black">
       <Header />
+
+      {showArgyleLink && argyleUserToken && (
+        <ArgyleLink
+          userToken={argyleUserToken}
+          onSuccess={handleArgyleLinkSuccess}
+          onClose={() => {
+            setShowArgyleLink(false)
+            setArgyleUserToken(null)
+          }}
+        />
+      )}
 
       <div className="pt-24 pb-12 px-4">
         <div className="container mx-auto">
@@ -353,11 +470,12 @@ function DashboardContent() {
                   real-time.
                 </p>
                 <Button
-                  onClick={() => router.push("/connect")}
+                  onClick={handleSyncTrips}
                   size="lg"
                   className="bg-gold hover:bg-gold-dark text-black font-semibold"
+                  disabled={syncing}
                 >
-                  Connect Accounts
+                  {syncing ? "Opening..." : "Connect Accounts"}
                 </Button>
               </CardContent>
             </Card>
@@ -452,10 +570,10 @@ function DashboardContent() {
           <div className="flex gap-4 mb-8">
             <Button
               onClick={handleSyncTrips}
-              disabled={syncing}
+              disabled={syncing || loading}
               className="bg-gold hover:bg-gold-dark text-black font-semibold"
             >
-              {syncing ? "Syncing..." : "Sync Trips (Argyle)"}
+              {syncing ? "Syncing..." : loading ? "Connecting..." : "Sync Trips (Argyle)"}
             </Button>
             <Button
               onClick={handleRefreshBalances}

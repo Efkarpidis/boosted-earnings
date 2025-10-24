@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { exchangeCode } from "@/lib/argyle"
-import { saveArgyleItem } from "@/lib/mongodb-schemas"
+import { saveArgyleItem, saveDriverConnection } from "@/lib/mongodb-schemas"
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +19,19 @@ export async function POST(request: NextRequest) {
       platform,
       createdAt: new Date(),
     })
+
+    await saveDriverConnection({
+      userId,
+      platform,
+      providerUserId: result.user_id || userId,
+      itemId: result.item_id,
+      accessToken: result.access_token,
+      connectedAt: new Date(),
+      status: "connected",
+      errorCount: 0,
+    })
+
+    console.log(`[Argyle Exchange] Connected ${platform} for user ${userId}`)
 
     return NextResponse.json({
       itemId: result.item_id,
