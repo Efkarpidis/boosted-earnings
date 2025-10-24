@@ -16,7 +16,7 @@ export default function ConnectPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [showLink, setShowLink] = useState(false)
-  const [linkToken, setLinkToken] = useState<string | null>(null)
+  const [userToken, setUserToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const handleConnect = async () => {
@@ -32,7 +32,7 @@ export default function ConnectPage() {
 
     setLoading(true)
     try {
-      const response = await fetch("/api/argyle/link-token", {
+      const response = await fetch("/api/argyle/user-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.uid }),
@@ -40,17 +40,17 @@ export default function ConnectPage() {
 
       const data = await response.json()
 
-      if (data.mock) {
+      if (data.mock || data.isMockMode) {
         toast({
           title: "Demo Mode",
-          description: "Opening Argyle Link in demo mode. Configure ARGYLE_LINK_KEY for real connections.",
+          description: "Opening Argyle Link in demo mode. Configure Argyle credentials for real connections.",
         })
       }
 
-      setLinkToken(data.linkToken)
+      setUserToken(data.userToken)
       setShowLink(true)
     } catch (error: any) {
-      console.error("Error creating link token:", error)
+      console.error("Error creating user token:", error)
       toast({
         title: "Connection Error",
         description: error.message || "Failed to initialize Argyle Link.",
@@ -100,7 +100,7 @@ export default function ConnectPage() {
 
   const handleClose = () => {
     setShowLink(false)
-    setLinkToken(null)
+    setUserToken(null)
   }
 
   return (
@@ -198,8 +198,8 @@ export default function ConnectPage() {
           </Card>
 
           {/* Argyle Link Modal */}
-          {showLink && linkToken && (
-            <ArgyleLink linkToken={linkToken} onSuccess={handleSuccess} onClose={handleClose} />
+          {showLink && userToken && (
+            <ArgyleLink userToken={userToken} onSuccess={handleSuccess} onClose={handleClose} />
           )}
         </div>
       </div>

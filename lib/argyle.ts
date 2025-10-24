@@ -228,3 +228,20 @@ export async function createLinkToken(userId: string) {
     return { link_token: `mock-link-token-${Date.now()}`, mock: true }
   }
 }
+
+export async function createUserToken(userId: string) {
+  if (!isArgyleConfigured() || !argyleClient) {
+    console.warn("[Argyle] Not configured, returning mock user token")
+    return { user_token: `mock-user-token-${userId}-${Date.now()}`, mock: true }
+  }
+
+  try {
+    const response = await argyleClient.post("/user-tokens", {
+      user_id: userId,
+    })
+    return { user_token: response.data.user_token, mock: false }
+  } catch (error: any) {
+    console.error("[Argyle] Error creating user token:", error.message)
+    return { user_token: `mock-user-token-${userId}-${Date.now()}`, mock: true, error: error.message }
+  }
+}

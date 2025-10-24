@@ -1,15 +1,14 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { env } from "@/lib/env"
 
 interface ArgyleLinkProps {
-  linkToken: string
+  userToken: string
   onSuccess: (code: string, metadata: any) => void
   onClose: () => void
 }
 
-export function ArgyleLink({ linkToken, onSuccess, onClose }: ArgyleLinkProps) {
+export function ArgyleLink({ userToken, onSuccess, onClose }: ArgyleLinkProps) {
   const linkRef = useRef<any>(null)
 
   useEffect(() => {
@@ -18,11 +17,9 @@ export function ArgyleLink({ linkToken, onSuccess, onClose }: ArgyleLinkProps) {
     script.src = "https://plugin.argyle.com/argyle.web.v3.js"
     script.async = true
     script.onload = () => {
-      // Initialize Argyle Link
       if (typeof window !== "undefined" && (window as any).Argyle) {
         linkRef.current = (window as any).Argyle.create({
-          linkKey: env.argyleLinkKey || linkToken,
-          userToken: linkToken,
+          userToken: userToken,
           onAccountConnected: ({ accountId, userId, linkItemId }: any) => {
             console.log("[Argyle Link] Account connected:", { accountId, userId, linkItemId })
           },
@@ -58,7 +55,7 @@ export function ArgyleLink({ linkToken, onSuccess, onClose }: ArgyleLinkProps) {
       }
       document.body.removeChild(script)
     }
-  }, [linkToken, onSuccess, onClose])
+  }, [userToken, onSuccess, onClose])
 
   return null
 }

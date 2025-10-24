@@ -17,7 +17,6 @@ export interface EnvConfig {
   plaidEnv: string
 
   // Argyle
-  argyleLinkKey?: string
   argyleClientId?: string
   argyleSecret?: string
   argyleEnv: string
@@ -51,7 +50,6 @@ export function validateEnv(): EnvConfig {
     plaidEnv: process.env.PLAID_ENV || "sandbox",
 
     // Argyle (optional in mock mode)
-    argyleLinkKey: process.env.ARGYLE_LINK_KEY,
     argyleClientId: process.env.ARGYLE_CLIENT_ID,
     argyleSecret: process.env.ARGYLE_SECRET,
     argyleEnv: process.env.ARGYLE_ENV || "sandbox",
@@ -69,9 +67,7 @@ export function validateEnv(): EnvConfig {
   if (!config.firebaseApiKey) errors.push("NEXT_PUBLIC_FIREBASE_API_KEY is required")
   if (!config.mongodbUri) errors.push("MONGODB_URI is required")
 
-  // In non-mock mode, require Argyle credentials
   if (!isMockMode) {
-    if (!config.argyleLinkKey) errors.push("ARGYLE_LINK_KEY is required (or set ARGYLE_MOCK=1)")
     if (!config.argyleClientId) errors.push("ARGYLE_CLIENT_ID is required (or set ARGYLE_MOCK=1)")
     if (!config.argyleSecret) errors.push("ARGYLE_SECRET is required (or set ARGYLE_MOCK=1)")
     if (!config.argyleWebhookSecret)
