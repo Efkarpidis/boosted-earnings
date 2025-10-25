@@ -20,6 +20,7 @@ import { EarningsTrendChart } from "./components/earnings-trend-chart"
 import { PlatformBreakdownChart as ArgylePlatformBreakdown } from "./components/platform-breakdown-chart"
 import { ArgyleLink } from "@/app/connect/argyle-link"
 import { useRouter } from "next/navigation"
+import { DebugPanel } from "./components/debug-panel"
 
 function DashboardContent() {
   const { user } = useAuth()
@@ -246,12 +247,13 @@ function DashboardContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user?.uid || "test-user" }),
+        cache: "no-store", // Disable caching
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "Sync failed")
+        throw new Error(`Sync failed (HTTP ${response.status}): ${data.error || "Unknown error"}`)
       }
 
       if (data.mock) {
@@ -268,6 +270,7 @@ function DashboardContent() {
 
       setLastUpdated(new Date())
       await fetchDashboardStats()
+      await fetchConnections()
     } catch (error: any) {
       console.error("[v0] Error syncing trips:", error)
       toast({
@@ -287,16 +290,23 @@ function DashboardContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user?.uid || "test-user" }),
+        cache: "no-store", // Disable caching
       })
 
       const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(`Refresh failed (HTTP ${response.status}): ${data.error || "Unknown error"}`)
+      }
 
       toast({
         title: "Balances Refreshed",
         description: `Updated balances for ${data.accountsUpdated || 0} accounts.`,
       })
+
+      await fetchDashboardStats()
     } catch (error: any) {
-      console.error("Error refreshing balances:", error)
+      console.error("[v0] Error refreshing balances:", error)
       toast({
         title: "Refresh Failed",
         description: error.message || "Failed to refresh balances from Plaid.",
@@ -307,55 +317,11 @@ function DashboardContent() {
     }
   }
 
-  const handleArgyleLinkSuccess = async (code: string, metadata: any) => {
-    console.log("[v0] Argyle Link success:", { code, metadata })
-    setShowArgyleLink(false)
-    setLoading(true)
-
-    try {
-      // Exchange code for access token
-      const exchangeResponse = await fetch("/api/argyle/exchange", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code,
-          userId: user?.uid || "test-user",
-          platform: metadata.account || "Uber",
-        }),
-      })
-
-      const exchangeData = await exchangeResponse.json()
-
-      if (!exchangeResponse.ok) {
-        throw new Error(exchangeData.error || "Failed to exchange code")
-      }
-
-      toast({
-        title: "Connection Successful!",
-        description: `Connected to ${exchangeData.platform}. Syncing your trip data...`,
-      })
-
-      // Trigger sync immediately after connection
-      await handleSyncTrips()
-
-      // Refresh connections list
-      await fetchConnections()
-      await fetchDashboardStats()
-    } catch (error: any) {
-      console.error("[v0] Error exchanging Argyle code:", error)
-      toast({
-        title: "Connection Error",
-        description: error.message || "Failed to complete connection.",
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch(`/api/dashboard/stats?userId=${user?.uid || "test-user"}`)
+      const response = await fetch(`/api/dashboard/stats?userId=${user?.uid || "test-user"}&t=${Date.now()}`, {
+        cache: "no-store",
+      })
       const data = await response.json()
 
       if (response.ok && data.stats) {
@@ -377,6 +343,67 @@ function DashboardContent() {
       }
     } catch (error) {
       console.error("[v0] Error fetching connections:", error)
+    }
+  }
+
+  const handleArgyleLinkSuccess = async (accountId: string, userId: string, linkItemId: string) => {
+    console.log("[v0] Argyle Link success:", { accountId, userId, linkItemId })
+
+    try {
+      // Exchange the code for access token
+      const exchangeResponse = await fetch("/api/argyle/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: accountId, // Argyle returns accountId as the code
+          userId: user?.uid || "test-user",
+          platform: "Uber", // TODO: Detect platform from metadata
+        }),
+      })
+
+      const exchangeData = await exchangeResponse.json()
+
+      if (!exchangeResponse.ok) {
+        throw new Error(`Exchange failed (HTTP ${exchangeResponse.status}): ${exchangeData.error || "Unknown error"}`)
+      }
+
+      toast({
+        title: "Account Connected!",
+        description: exchangeData.mock
+          ? "Connected with mock data. Configure Argyle credentials for real data."
+          : "Successfully connected your account.",
+      })
+
+      // Automatically sync data after connection
+      const syncResponse = await fetch("/api/argyle/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.uid || "test-user" }),
+        cache: "no-store",
+      })
+
+      const syncData = await syncResponse.json()
+
+      if (syncResponse.ok) {
+        toast({
+          title: "Data Synced!",
+          description: `Synced ${syncData.tripsUpserted} trips and ${syncData.earningsUpserted} earnings.`,
+        })
+      }
+
+      // Refresh dashboard data
+      await fetchDashboardStats()
+      await fetchConnections()
+    } catch (error: any) {
+      console.error("[v0] Error in Argyle Link success handler:", error)
+      toast({
+        title: "Connection Error",
+        description: error.message || "Failed to complete connection.",
+        variant: "destructive",
+      })
+    } finally {
+      setShowArgyleLink(false)
+      setArgyleUserToken(null)
     }
   }
 
@@ -670,6 +697,8 @@ function DashboardContent() {
           <WeeklyComparison data={earningsData?.dailyData} />
         </div>
       </div>
+
+      <DebugPanel userId={user?.uid} />
 
       <Footer />
     </div>

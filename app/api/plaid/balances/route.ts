@@ -7,18 +7,27 @@ import {
   type Account,
   type BalanceHistory,
 } from "@/lib/mongodb-schemas"
+import { generateRequestId, logRequest, logResponse, logError } from "@/lib/request-logger"
+import { revalidateTag } from "next/cache"
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId()
+
   try {
-    const { userId } = await request.json()
+    const body = await request.json()
+    logRequest(requestId, "POST", "/api/plaid/balances", body)
+
+    const { userId } = body
 
     if (!userId) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
+      const error = { error: "User ID is required" }
+      logResponse(requestId, 400, error)
+      return NextResponse.json(error, { status: 400 })
     }
 
     if (!isPlaidConfigured()) {
-      console.warn("Plaid not configured, returning mock balances")
-      return NextResponse.json({
+      console.warn(`[${requestId}] Plaid not configured, returning mock balances`)
+      const mockResponse = {
         accounts: [
           {
             accountId: "mock-account-1",
@@ -31,8 +40,11 @@ export async function POST(request: NextRequest) {
             currency: "USD",
           },
         ],
+        accountsUpdated: 1,
         mock: true,
-      })
+      }
+      logResponse(requestId, 200, mockResponse)
+      return NextResponse.json(mockResponse)
     }
 
     // Get all Plaid items for this user
@@ -40,10 +52,13 @@ export async function POST(request: NextRequest) {
     const items = await itemsCollection.find({ userId }).toArray()
 
     if (items.length === 0) {
-      return NextResponse.json({ accounts: [], message: "No connected accounts" })
+      const response = { accounts: [], accountsUpdated: 0, message: "No connected accounts" }
+      logResponse(requestId, 200, response)
+      return NextResponse.json(response)
     }
 
     const allAccounts: any[] = []
+    let accountsUpdated = 0
 
     // Fetch balances for each item
     for (const item of items) {
@@ -99,19 +114,26 @@ export async function POST(request: NextRequest) {
             limit: account.balances.limit,
             currency: account.balances.iso_currency_code || "USD",
           })
+
+          accountsUpdated++
         }
 
         // Update last synced time
         await itemsCollection.updateOne({ itemId: item.itemId }, { $set: { lastSynced: new Date() } })
       } catch (error: any) {
-        console.error(`Error fetching balances for item ${item.itemId}:`, error.message)
+        console.error(`[${requestId}] Error fetching balances for item ${item.itemId}:`, error.message)
         continue
       }
     }
 
-    return NextResponse.json({ accounts: allAccounts })
+    revalidateTag("dashboard-stats")
+    revalidateTag("plaid-balances")
+
+    const responseData = { accounts: allAccounts, accountsUpdated }
+    logResponse(requestId, 200, responseData)
+    return NextResponse.json(responseData)
   } catch (error: any) {
-    console.error("Error in /api/plaid/balances:", error)
-    return NextResponse.json({ error: error.message || "Failed to fetch balances" }, { status: 500 })
+    logError(requestId, error)
+    return NextResponse.json({ error: error.message || "Failed to fetch balances", requestId }, { status: 500 })
   }
 }

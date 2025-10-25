@@ -7,13 +7,22 @@ import {
   saveDriverBalance,
   saveDriverConnection,
 } from "@/lib/mongodb-schemas"
+import { generateRequestId, logRequest, logResponse, logError } from "@/lib/request-logger"
+import { revalidateTag } from "next/cache"
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId()
+
   try {
-    const { userId, platform, backfill } = await request.json()
+    const body = await request.json()
+    logRequest(requestId, "POST", "/api/argyle/sync", body)
+
+    const { userId, platform, backfill } = body
 
     if (!userId) {
-      return NextResponse.json({ error: "Missing required field: userId" }, { status: 400 })
+      const error = { error: "Missing required field: userId" }
+      logResponse(requestId, 400, error)
+      return NextResponse.json(error, { status: 400 })
     }
 
     const connectionsCollection = await getDriverConnectionsCollection()
@@ -23,7 +32,9 @@ export async function POST(request: NextRequest) {
     const connections = await connectionsCollection.find(query).toArray()
 
     if (connections.length === 0) {
-      return NextResponse.json({ error: "No connected accounts found for this user" }, { status: 404 })
+      const error = { error: "No connected accounts found for this user" }
+      logResponse(requestId, 404, error)
+      return NextResponse.json(error, { status: 404 })
     }
 
     let totalTripsUpserted = 0
@@ -35,12 +46,14 @@ export async function POST(request: NextRequest) {
       try {
         // Determine since date for incremental sync
         const sinceDate = backfill
-          ? new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0] // 365 days ago
+          ? new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
           : connection.lastSyncAt
             ? new Date(connection.lastSyncAt).toISOString().split("T")[0]
             : undefined
 
-        console.log(`[Argyle Sync] Syncing ${connection.platform} for user ${userId}, since=${sinceDate || "all time"}`)
+        console.log(
+          `[${requestId}] Syncing ${connection.platform} for user ${userId}, since=${sinceDate || "all time"}`,
+        )
 
         // Fetch data with pagination
         const [earningsResult, activitiesResult, balancesResult] = await Promise.all([
@@ -113,10 +126,10 @@ export async function POST(request: NextRequest) {
         })
 
         console.log(
-          `[Argyle Sync] Completed ${connection.platform}: trips=${totalTripsUpserted}, earnings=${totalEarningsUpserted}, pages=${totalPagesFetched}`,
+          `[${requestId}] Completed ${connection.platform}: trips=${totalTripsUpserted}, earnings=${totalEarningsUpserted}, pages=${totalPagesFetched}`,
         )
       } catch (error: any) {
-        console.error(`[Argyle Sync] Error syncing ${connection.platform}:`, error)
+        console.error(`[${requestId}] Error syncing ${connection.platform}:`, error)
 
         // Update connection with error
         await saveDriverConnection({
@@ -128,16 +141,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    revalidateTag("dashboard-stats")
+    revalidateTag("argyle-connections")
+
+    const response = {
       tripsUpserted: totalTripsUpserted,
       earningsUpserted: totalEarningsUpserted,
       balancesUpserted: totalBalancesUpserted,
       pagesFetched: totalPagesFetched,
       connectionsSynced: connections.length,
       mock: connections[0]?.accessToken?.startsWith("mock-") || false,
-    })
+    }
+
+    logResponse(requestId, 200, response)
+    return NextResponse.json(response)
   } catch (error: any) {
-    console.error("[Argyle Sync] Error:", error)
-    return NextResponse.json({ error: error.message || "Sync failed" }, { status: 500 })
+    logError(requestId, error)
+    return NextResponse.json({ error: error.message || "Sync failed", requestId }, { status: 500 })
   }
 }

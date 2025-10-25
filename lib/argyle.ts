@@ -245,3 +245,5 @@ export async function createUserToken(userId: string) {
     return { user_token: `mock-user-token-${userId}-${Date.now()}`, mock: true, error: error.message }
   }
 }
+
+export { env }

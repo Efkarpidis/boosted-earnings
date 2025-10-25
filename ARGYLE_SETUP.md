@@ -301,6 +301,74 @@ This is normal for new connections:
 - Sandbox Test Accounts: https://docs.argyle.com/guides/testing
 - API Reference: https://docs.argyle.com/api-reference
 
+## Debug Tools (Development Only)
+
+### Debug Panel
+
+A floating debug panel appears in the bottom-right corner during development (`NODE_ENV=development`). It shows:
+
+- **User ID**: Current authenticated user
+- **Service Health**: Real-time status of Argyle and Plaid services
+- **Connected Accounts**: List of connected platforms and their status
+- **Last API Call**: Most recent API request with status code, duration, and errors
+
+**Usage:**
+1. Click the panel to expand/collapse
+2. Click "Refresh Debug Info" to update health and connection status
+3. Monitor API calls in real-time as you interact with the dashboard
+
+### Health Check Endpoints
+
+Two health check endpoints validate service configuration:
+
+**Argyle Health Check:**
+\`\`\`bash
+curl http://localhost:3000/api/health/argyle
+\`\`\`
+
+Response:
+\`\`\`json
+{
+  "ok": true,
+  "configured": true,
+  "mockMode": false,
+  "env": "sandbox",
+  "timestamp": "2025-01-23T12:00:00.000Z"
+}
+\`\`\`
+
+**Plaid Health Check:**
+\`\`\`bash
+curl http://localhost:3000/api/health/plaid
+\`\`\`
+
+Response:
+\`\`\`json
+{
+  "ok": true,
+  "configured": true,
+  "env": "sandbox",
+  "timestamp": "2025-01-23T12:00:00.000Z"
+}
+\`\`\`
+
+**Error Response (Missing Credentials):**
+\`\`\`json
+{
+  "ok": false,
+  "configured": false,
+  "message": "Argyle credentials not configured",
+  "missing": ["ARGYLE_CLIENT_ID", "ARGYLE_SECRET"],
+  "timestamp": "2025-01-23T12:00:00.000Z"
+}
+\`\`\`
+
+**Use Cases:**
+- Verify environment variables are set correctly in Vercel
+- Monitor service health in production
+- Integrate with uptime monitoring tools (Pingdom, UptimeRobot, etc.)
+- Debug configuration issues before deploying
+
 ## Screenshots
 
 ### Adding Webhook in Argyle Console

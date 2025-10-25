@@ -1,13 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getDriverTripsCollection, getDriverEarningsCollection } from "@/lib/mongodb-schemas"
+import { generateRequestId, logRequest, logResponse, logError } from "@/lib/request-logger"
+
+export const revalidate = 0 // Disable caching for real-time updates
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId()
+
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("userId")
 
+    logRequest(requestId, "GET", "/api/dashboard/stats", { userId })
+
     if (!userId) {
-      return NextResponse.json({ error: "Missing userId parameter" }, { status: 400 })
+      const error = { error: "Missing userId parameter" }
+      logResponse(requestId, 400, error)
+      return NextResponse.json(error, { status: 400 })
     }
 
     const tripsCollection = await getDriverTripsCollection()
@@ -37,20 +46,29 @@ export async function GET(request: NextRequest) {
     const totalHours = trips.reduce((sum, t) => sum + t.durationMin / 60, 0)
     const avgHourly = totalHours > 0 ? totalEarnings / totalHours : 0
 
-    return NextResponse.json({
+    const response = {
       stats: {
         totalEarnings,
         trips: totalTrips,
-        hoursWorked: totalHours,
-        avgHourly,
+        hoursWorked: Number.parseFloat(totalHours.toFixed(1)),
+        avgHourly: Number.parseFloat(avgHourly.toFixed(2)),
         earningsChange: 12.5, // TODO: Calculate actual change
         hoursChange: -5.2, // TODO: Calculate actual change
         avgHourlyChange: 18.7, // TODO: Calculate actual change
         tripsChange: 8.3, // TODO: Calculate actual change
       },
+    }
+
+    logResponse(requestId, 200, response)
+
+    return NextResponse.json(response, {
+      headers: {
+        "Cache-Control": "no-store, must-revalidate",
+        "CDN-Cache-Control": "no-store",
+      },
     })
   } catch (error: any) {
-    console.error("[Dashboard Stats] Error:", error)
-    return NextResponse.json({ error: error.message || "Failed to fetch stats" }, { status: 500 })
+    logError(requestId, error)
+    return NextResponse.json({ error: error.message || "Failed to fetch stats", requestId }, { status: 500 })
   }
 }

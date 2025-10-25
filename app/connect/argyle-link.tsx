@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react"
 
 interface ArgyleLinkProps {
   userToken: string
-  onSuccess: (code: string, metadata: any) => void
+  onSuccess: (accountId: string, userId: string, linkItemId: string) => void
   onClose: () => void
 }
 
@@ -18,10 +18,13 @@ export function ArgyleLink({ userToken, onSuccess, onClose }: ArgyleLinkProps) {
     script.async = true
     script.onload = () => {
       if (typeof window !== "undefined" && (window as any).Argyle) {
+        console.log("[Argyle Link] Initializing with userToken:", userToken.substring(0, 20) + "...")
+
         linkRef.current = (window as any).Argyle.create({
           userToken: userToken,
           onAccountConnected: ({ accountId, userId, linkItemId }: any) => {
             console.log("[Argyle Link] Account connected:", { accountId, userId, linkItemId })
+            onSuccess(accountId, userId, linkItemId)
           },
           onAccountRemoved: ({ accountId, userId, linkItemId }: any) => {
             console.log("[Argyle Link] Account removed:", { accountId, userId, linkItemId })
@@ -38,22 +41,33 @@ export function ArgyleLink({ userToken, onSuccess, onClose }: ArgyleLinkProps) {
           onUserCreated: ({ userId, userToken }: any) => {
             console.log("[Argyle Link] User created:", { userId })
           },
-          onSuccess: ({ code, metadata }: any) => {
-            console.log("[Argyle Link] Success:", { code, metadata })
-            onSuccess(code, metadata)
+          onError: (error: any) => {
+            console.error("[Argyle Link] Error:", error)
+            onClose()
           },
         })
 
+        console.log("[Argyle Link] Opening modal...")
         linkRef.current.open()
+      } else {
+        console.error("[Argyle Link] Argyle SDK not loaded")
       }
     }
+
+    script.onerror = () => {
+      console.error("[Argyle Link] Failed to load Argyle SDK")
+      onClose()
+    }
+
     document.body.appendChild(script)
 
     return () => {
       if (linkRef.current) {
         linkRef.current.close()
       }
-      document.body.removeChild(script)
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
     }
   }, [userToken, onSuccess, onClose])
 
