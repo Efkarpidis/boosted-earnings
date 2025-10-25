@@ -12,9 +12,8 @@ export function ArgyleLink({ userToken, onSuccess, onClose }: ArgyleLinkProps) {
   const linkRef = useRef<any>(null)
 
   useEffect(() => {
-    // Load Argyle Link SDK
     const script = document.createElement("script")
-    script.src = "https://plugin.argyle.com/argyle.web.v3.js"
+    script.src = "https://plugin.argyle.com/argyle.web.v4.js"
     script.async = true
     script.onload = () => {
       if (typeof window !== "undefined" && (window as any).Argyle) {
